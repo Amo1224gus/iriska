@@ -28,6 +28,31 @@ body {
     display: block;
 }
 
+/* Запрет выделения изображений */
+img {
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+.clicker-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+#level-display {
+    font-size: 64px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.cat-image {
+    width: 200px;
+    cursor: pointer;
+}
+
 /* Нижняя панель */
 .bottom-panel {
     position: fixed;
@@ -58,4 +83,16 @@ body {
 #countdown {
     font-size: 24px;
     margin: 20px 0;
+}
+
+/* Кнопки улучшений */
+.fluent-btn {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 18px;
+    margin: 10px 0;
 }
