@@ -4,57 +4,53 @@ let autoclicksPerSecond = 0;
 let multiplier = 1;
 let autoclickerPrice = 10;
 let multiplierPrice = 50;
+let offlineClickerPrice = 500;
+let offlineAutoclicks = false;
 
 // Обновление отображения монет
 function updateCoinsDisplay() {
     document.getElementById("level").textContent = level;
 }
 
-// Обработчик кликов по кошке
-const cat = document.getElementById("cat");
-cat.addEventListener("click", (event) => {
-    level += multiplier;
-    coins += multiplier;
-    updateCoinsDisplay();
-
-    // Анимация "+1" рядом с местом клика
-    const floatingText = document.createElement("div");
-    floatingText.textContent = `+${multiplier}`;
-    floatingText.classList.add("floating-text");
-    floatingText.style.left = `${event.clientX}px`;
-    floatingText.style.top = `${event.clientY}px`;
-    document.body.appendChild(floatingText);
-
-    // Анимация уменьшения части кошки
-    let offsetX = event.clientX - cat.getBoundingClientRect().left;
-    let offsetY = event.clientY - cat.getBoundingClientRect().top;
-    let originX = offsetX / cat.offsetWidth * 100;
-    let originY = offsetY / cat.offsetHeight * 100;
-    cat.style.transformOrigin = `${originX}% ${originY}%`;
-    cat.style.transform = "scale(0.9)";
-
-    setTimeout(() => {
-        cat.style.transform = "scale(1)";
-    }, 150);
-
-    setTimeout(() => {
-        document.body.removeChild(floatingText);
-    }, 1000);
+// Переключение между экранами
+document.querySelectorAll('.nav-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+        document.getElementById(button.dataset.target).classList.add('active');
+    });
 });
 
-// Обработчик покупки автокликера
+// Обратный отсчет до 1 ноября 2024
+const countdown = document.getElementById('countdown');
+const targetDate = new Date('November 1, 2024 00:00:00').getTime();
+
+setInterval(() => {
+    const now = new Date().getTime();
+    const distance = targetDate - now;
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    countdown.innerHTML = `${days}д ${hours}ч ${minutes}м ${seconds}с`;
+
+    if (distance < 0) {
+        countdown.innerHTML = "Листинг завершён!";
+    }
+}, 1000);
+
+// Обработчик покупки улучшений
 document.getElementById("buy-autoclicker").addEventListener("click", () => {
     if (coins >= autoclickerPrice) {
         coins -= autoclickerPrice;
         autoclicksPerSecond += 1;
         autoclickerPrice = Math.floor(autoclickerPrice * 1.5);
         document.getElementById("autoclicker-price").textContent = autoclickerPrice;
-        document.getElementById("autoclick-info").textContent = `Автоклики: ${autoclicksPerSecond}/с`;
         updateCoinsDisplay();
     }
 });
 
-// Обработчик покупки множителя
 document.getElementById("buy-multiplier").addEventListener("click", () => {
     if (coins >= multiplierPrice) {
         coins -= multiplierPrice;
@@ -65,7 +61,15 @@ document.getElementById("buy-multiplier").addEventListener("click", () => {
     }
 });
 
-// Автоклики
+document.getElementById("buy-offline-clicks").addEventListener("click", () => {
+    if (coins >= offlineClickerPrice) {
+        coins -= offlineClickerPrice;
+        offlineAutoclicks = true;
+        updateCoinsDisplay();
+    }
+});
+
+// Автоклики и оффлайн автоклики
 setInterval(() => {
     if (autoclicksPerSecond > 0) {
         level += autoclicksPerSecond;
@@ -74,63 +78,3 @@ setInterval(() => {
     }
 }, 1000);
 
-// Переключение панели улучшений
-const upgradeContainer = document.getElementById("upgrade-container");
-document.getElementById("arrow-toggle").addEventListener("click", () => {
-    if (upgradeContainer.style.width === "0px" || upgradeContainer.style.width === "") {
-        upgradeContainer.style.width = "20%";
-        document.getElementById("clicker-container").style.width = "80%";
-    } else {
-        upgradeContainer.style.width = "0px";
-        document.getElementById("clicker-container").style.width = "100%";
-    }
-});
-
-// Настройки
-document.getElementById("settings-btn").addEventListener("click", () => {
-    document.getElementById("settings-modal").style.display = "block";
-});
-
-document.querySelector(".close-settings").addEventListener("click", () => {
-    document.getElementById("settings-modal").style.display = "none";
-});
-
-document.getElementById("theme-toggle").addEventListener("change", (event) => {
-    document.body.classList.toggle("dark-theme", event.target.checked);
-});
-
-// Сохранение и загрузка файла JSON
-document.getElementById("save-game").addEventListener("click", () => {
-    const gameData = { level, coins, autoclicksPerSecond, multiplier, autoclickerPrice, multiplierPrice };
-    const blob = new Blob([JSON.stringify(gameData)], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "game-data.json";
-    link.click();
-});
-
-document.getElementById("load-game").addEventListener("click", () => {
-    document.getElementById("file-input").click();
-});
-
-document.getElementById("file-input").addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const gameData = JSON.parse(e.target.result);
-            level = gameData.level;
-            coins = gameData.coins;
-            autoclicksPerSecond = gameData.autoclicksPerSecond;
-            multiplier = gameData.multiplier;
-            autoclickerPrice = gameData.autoclickerPrice;
-            multiplierPrice = gameData.multiplierPrice;
-
-            updateCoinsDisplay();
-            document.getElementById("autoclicker-price").textContent = autoclickerPrice;
-            document.getElementById("multiplier-price").textContent = multiplierPrice;
-            document.getElementById("autoclick-info").textContent = `Автоклики: ${autoclicksPerSecond}/с`;
-        };
-        reader.readAsText(file);
-    }
-});
