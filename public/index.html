@@ -8,68 +8,60 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/styles.css"> <!-- Исправленный путь -->
 </head>
-<body class="light-theme">
+<body class="dark-theme"> <!-- Темная тема по умолчанию -->
+
     <div class="main-container">
-        <div class="clicker-section" id="clicker-container">
+        <!-- Экран с кликером -->
+        <div class="screen active" id="clicker-screen">
             <h1>Уровень кошки: <span id="level">0</span></h1>
             <p id="autoclick-info"></p> <!-- Информация про автоклики -->
-            <img id="cat" src="/cat.png" alt="cat" class="cat-image" unselectable="on"> <!-- Исправленный путь -->
+            <img id="cat" src="/cat.png" alt="cat" class="cat-image" unselectable="on">
         </div>
 
-        <div class="upgrade-section" id="upgrade-container">
-            <div class="upgrade">
-                <button id="buy-autoclicker" class="fluent-btn">
-                    <i class="fas fa-mouse-pointer"></i>
-                    <span>Автокликер (Цена: <span id="autoclicker-price">10</span>)</span>
-                </button>
-            </div>
-            <div class="upgrade">
-                <button id="buy-multiplier" class="fluent-btn">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Множитель (Цена: <span id="multiplier-price">50</span>)</span>
-                </button>
-            </div>
+        <!-- Экран улучшений -->
+        <div class="screen" id="upgrade-screen">
+            <h2>Улучшения</h2>
+            <button id="buy-autoclicker" class="fluent-btn">
+                <i class="fas fa-mouse-pointer"></i>
+                <span>Автокликер (Цена: <span id="autoclicker-price">10</span>)</span>
+            </button>
+            <button id="buy-multiplier" class="fluent-btn">
+                <i class="fas fa-chart-line"></i>
+                <span>Множитель (Цена: <span id="multiplier-price">50</span>)</span>
+            </button>
+            <button id="buy-offline-clicks" class="fluent-btn"> <!-- Новое улучшение -->
+                <i class="fas fa-clock"></i>
+                <span>Автокликер за отсутствие (Цена: <span id="offline-clicker-price">500</span>)</span>
+            </button>
         </div>
 
-        <!-- Кнопка разворота панели -->
-        <div id="arrow-toggle" class="arrow">&#9664;</div>
-    </div>
+        <!-- Экран мини-игр -->
+        <div class="screen" id="mini-games-screen">
+            <h2>Скоро будет</h2>
+            <p>А пока можешь помурлыкать как Ириска!</p>
+        </div>
 
-    <!-- Кнопка настроек -->
-    <button id="settings-btn" class="settings-btn">
-        <i class="fas fa-cog"></i>
-    </button>
-
-    <!-- Кнопка сохранения/загрузки -->
-    <button id="file-btn" class="file-btn">
-        <i class="fas fa-file"></i>
-    </button>
-
-    <!-- Модальное окно для настроек -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content draggable" id="draggable">
-            <span class="close-settings">&times;</span>
-            <h2>Настройки</h2>
-            <label for="music-toggle">Музыка</label>
-            <input type="checkbox" id="music-toggle">
-            <label for="sound-toggle">Звуковые эффекты</label>
-            <input type="checkbox" id="sound-toggle">
-            <label for="theme-toggle">Тёмная тема</label>
-            <input type="checkbox" id="theme-toggle">
+        <!-- Экран листинга -->
+        <div class="screen" id="listing-screen">
+            <h2>Листинг 1 ноября 2024</h2>
+            <div id="countdown"></div> <!-- Место для обратного отсчета -->
+            <p>На какие кошельки можно вывести Ириску:</p>
+            <ul>
+                <li>Bitcoin: xxxxxxx</li>
+                <li>Ethereum: xxxxxxx</li>
+                <li>USDT: xxxxxxx</li>
+            </ul>
         </div>
     </div>
 
-    <!-- Модальное окно для загрузки/сохранения -->
-    <div id="file-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-file">&times;</span>
-            <h2>Файл игры</h2>
-            <button id="save-game">Скачать JSON</button>
-            <button id="load-game">Загрузить JSON</button>
-            <input type="file" id="file-input" style="display:none;">
-        </div>
+    <!-- Нижняя панель для навигации -->
+    <div class="bottom-panel">
+        <button class="nav-btn" data-target="clicker-screen">Кликер</button>
+        <button class="nav-btn" data-target="upgrade-screen">Улучшения</button>
+        <button class="nav-btn" data-target="mini-games-screen">Мини игры</button>
+        <button class="nav-btn" data-target="listing-screen">Листинг</button>
     </div>
 
-    <script src="/scripts.js"></script> <!-- Исправленный путь -->
+    <script src="/scripts.js"></script>
 </body>
 </html>
