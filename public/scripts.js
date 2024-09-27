@@ -1,118 +1,129 @@
-let level = 0;
-let coins = 0;
-let autoclicksPerSecond = 0;
-let multiplier = 1;
-let autoclickerPrice = 10;
-let multiplierPrice = 50;
-let offlineClickerPrice = 500;
-let offlineAutoclicks = false;
-let telegramUserId = 12345; // Для теста, замени на реальный ID пользователя Telegram
-
-// Обновление отображения уровня
-function updateCoinsDisplay() {
-    document.getElementById("level-display").textContent = level;
+/* Fluent стиль для всего приложения */
+body {
+    font-family: 'Lilita One', cursive;
+    background-color: rgba(28, 27, 41, 0.9);
+    color: #ffffff;
+    backdrop-filter: blur(10px);
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
 }
 
-// Переключение экранов
-document.querySelectorAll('.nav-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-        document.getElementById(button.dataset.target).classList.add('active');
-    });
-});
-
-// Обработчик кликов по кошке
-const cat = document.getElementById("cat");
-cat.addEventListener("click", (event) => {
-    level += multiplier;
-    coins += multiplier;
-    updateCoinsDisplay();
-
-    // Анимация "+1" рядом с местом клика
-    const floatingText = document.createElement("div");
-    floatingText.textContent = `+${multiplier}`;
-    floatingText.classList.add("floating-text");
-    floatingText.style.left = `${event.clientX}px`;
-    floatingText.style.top = `${event.clientY}px`;
-    document.body.appendChild(floatingText);
-
-    setTimeout(() => {
-        document.body.removeChild(floatingText);
-    }, 1000);
-});
-
-// Обработчики покупок улучшений
-document.getElementById("buy-autoclicker").addEventListener("click", () => {
-    if (coins >= autoclickerPrice) {
-        coins -= autoclickerPrice;
-        autoclicksPerSecond += 1;
-        autoclickerPrice = Math.floor(autoclickerPrice * 1.5);
-        updateCoinsDisplay();
-    }
-});
-
-document.getElementById("buy-multiplier").addEventListener("click", () => {
-    if (coins >= multiplierPrice) {
-        coins -= multiplierPrice;
-        multiplier += 1;
-        multiplierPrice = Math.floor(multiplierPrice * 2);
-        updateCoinsDisplay();
-    }
-});
-
-// Новое улучшение - автокликер за отсутствие
-document.getElementById("buy-offline-clicks").addEventListener("click", () => {
-    if (coins >= offlineClickerPrice) {
-        coins -= offlineClickerPrice;
-        offlineAutoclicks = true;
-        updateCoinsDisplay();
-    }
-});
-
-// Система автокликов
-setInterval(() => {
-    if (autoclicksPerSecond > 0) {
-        level += autoclicksPerSecond;
-        coins += autoclicksPerSecond;
-        updateCoinsDisplay();
-    }
-}, 1000);
-
-// Сохранение прогресса по ID пользователя
-function saveProgress(userId) {
-    const gameData = { level, coins, autoclicksPerSecond, multiplier, autoclickerPrice, multiplierPrice };
-    localStorage.setItem(`gameData_${userId}`, JSON.stringify(gameData));
+/* Прозрачные элементы и эффекты размытости */
+.dark-theme {
+    background-color: rgba(28, 27, 41, 0.9);
+    backdrop-filter: blur(10px);
 }
 
-// Загрузка прогресса
-function loadProgress(userId) {
-    const savedData = localStorage.getItem(`gameData_${userId}`);
-    if (savedData) {
-        const gameData = JSON.parse(savedData);
-        level = gameData.level;
-        coins = gameData.coins;
-        autoclicksPerSecond = gameData.autoclicksPerSecond;
-        multiplier = gameData.multiplier;
-        autoclickerPrice = gameData.autoclickerPrice;
-        multiplierPrice = gameData.multiplierPrice;
-        updateCoinsDisplay();
+.main-container {
+    height: 90vh;
+    overflow: hidden;
+    position: relative;
+    backdrop-filter: blur(5px);
+    background-color: rgba(45, 45, 70, 0.6);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Плавные анимации для экрана и кнопок */
+.screen {
+    display: none;
+    padding: 20px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.screen.active {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Запрет выделения изображений */
+img {
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+.clicker-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+#level-display {
+    font-size: 64px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.cat-image {
+    width: 200px;
+    cursor: pointer;
+}
+
+/* Нижняя панель */
+.bottom-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #2c2b3e;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.nav-btn:hover {
+    color: #9f9fff;
+}
+
+/* Кнопки бирж в аирдропе */
+.cryptobutton {
+    background-color: rgba(40, 40, 90, 0.6);
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.cryptobutton:hover {
+    background-color: rgba(60, 60, 120, 0.8);
+}
+
+/* Анимация "+1" */
+@keyframes float {
+    0% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
     }
 }
 
-// Загружаем прогресс при старте
-loadProgress(telegramUserId);
-
-// Таймер сохранения прогресса каждые 10 секунд
-setInterval(() => saveProgress(telegramUserId), 10000);
-
-// Система рефералов
-function referFriend() {
-    const referralLink = `https://example.com/game?ref=${telegramUserId}`;
-    alert(`Пригласите друга по ссылке: ${referralLink} и получите 100 кликов!`);
-}
-
-// Получить награду за приглашение друга
-function claimReferralReward() {
-    level += 100;
-    updateCoinsDisplay();
+.floating-text {
+    position: absolute;
+    color: #fff;
+    font-size: 24px;
+    text-shadow: 2px 2px 0 #000;
+    animation: float 1s ease-out forwards;
+    pointer-events: none;
 }
