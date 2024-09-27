@@ -6,13 +6,14 @@ let autoclickerPrice = 10;
 let multiplierPrice = 50;
 let offlineClickerPrice = 500;
 let offlineAutoclicks = false;
+let telegramUserId = 12345; // Для теста, замени на реальный ID пользователя Telegram
 
-// Обновление отображения монет
+// Обновление отображения уровня
 function updateCoinsDisplay() {
-    document.getElementById("level").textContent = level;
+    document.getElementById("level-display").textContent = level;
 }
 
-// Переключение между экранами
+// Переключение экранов
 document.querySelectorAll('.nav-btn').forEach(button => {
     button.addEventListener('click', () => {
         document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
@@ -20,33 +21,32 @@ document.querySelectorAll('.nav-btn').forEach(button => {
     });
 });
 
-// Обратный отсчет до 1 ноября 2024
-const countdown = document.getElementById('countdown');
-const targetDate = new Date('November 1, 2024 00:00:00').getTime();
+// Обработчик кликов по кошке
+const cat = document.getElementById("cat");
+cat.addEventListener("click", (event) => {
+    level += multiplier;
+    coins += multiplier;
+    updateCoinsDisplay();
 
-setInterval(() => {
-    const now = new Date().getTime();
-    const distance = targetDate - now;
+    // Анимация "+1" рядом с местом клика
+    const floatingText = document.createElement("div");
+    floatingText.textContent = `+${multiplier}`;
+    floatingText.classList.add("floating-text");
+    floatingText.style.left = `${event.clientX}px`;
+    floatingText.style.top = `${event.clientY}px`;
+    document.body.appendChild(floatingText);
 
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    setTimeout(() => {
+        document.body.removeChild(floatingText);
+    }, 1000);
+});
 
-    countdown.innerHTML = `${days}д ${hours}ч ${minutes}м ${seconds}с`;
-
-    if (distance < 0) {
-        countdown.innerHTML = "Листинг завершён!";
-    }
-}, 1000);
-
-// Обработчик покупки улучшений
+// Обработчики покупок улучшений
 document.getElementById("buy-autoclicker").addEventListener("click", () => {
     if (coins >= autoclickerPrice) {
         coins -= autoclickerPrice;
         autoclicksPerSecond += 1;
         autoclickerPrice = Math.floor(autoclickerPrice * 1.5);
-        document.getElementById("autoclicker-price").textContent = autoclickerPrice;
         updateCoinsDisplay();
     }
 });
@@ -56,11 +56,11 @@ document.getElementById("buy-multiplier").addEventListener("click", () => {
         coins -= multiplierPrice;
         multiplier += 1;
         multiplierPrice = Math.floor(multiplierPrice * 2);
-        document.getElementById("multiplier-price").textContent = multiplierPrice;
         updateCoinsDisplay();
     }
 });
 
+// Новое улучшение - автокликер за отсутствие
 document.getElementById("buy-offline-clicks").addEventListener("click", () => {
     if (coins >= offlineClickerPrice) {
         coins -= offlineClickerPrice;
@@ -69,7 +69,7 @@ document.getElementById("buy-offline-clicks").addEventListener("click", () => {
     }
 });
 
-// Автоклики и оффлайн автоклики
+// Система автокликов
 setInterval(() => {
     if (autoclicksPerSecond > 0) {
         level += autoclicksPerSecond;
@@ -78,3 +78,41 @@ setInterval(() => {
     }
 }, 1000);
 
+// Сохранение прогресса по ID пользователя
+function saveProgress(userId) {
+    const gameData = { level, coins, autoclicksPerSecond, multiplier, autoclickerPrice, multiplierPrice };
+    localStorage.setItem(`gameData_${userId}`, JSON.stringify(gameData));
+}
+
+// Загрузка прогресса
+function loadProgress(userId) {
+    const savedData = localStorage.getItem(`gameData_${userId}`);
+    if (savedData) {
+        const gameData = JSON.parse(savedData);
+        level = gameData.level;
+        coins = gameData.coins;
+        autoclicksPerSecond = gameData.autoclicksPerSecond;
+        multiplier = gameData.multiplier;
+        autoclickerPrice = gameData.autoclickerPrice;
+        multiplierPrice = gameData.multiplierPrice;
+        updateCoinsDisplay();
+    }
+}
+
+// Загружаем прогресс при старте
+loadProgress(telegramUserId);
+
+// Таймер сохранения прогресса каждые 10 секунд
+setInterval(() => saveProgress(telegramUserId), 10000);
+
+// Система рефералов
+function referFriend() {
+    const referralLink = `https://example.com/game?ref=${telegramUserId}`;
+    alert(`Пригласите друга по ссылке: ${referralLink} и получите 100 кликов!`);
+}
+
+// Получить награду за приглашение друга
+function claimReferralReward() {
+    level += 100;
+    updateCoinsDisplay();
+}
