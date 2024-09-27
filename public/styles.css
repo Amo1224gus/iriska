@@ -1,31 +1,42 @@
-/* Основные стили */
+/* Fluent стиль для всего приложения */
 body {
     font-family: 'Lilita One', cursive;
-    background-color: #1c1b29;
+    background-color: rgba(28, 27, 41, 0.9);
     color: #ffffff;
-    user-select: none;
+    backdrop-filter: blur(10px);
     transition: background-color 0.3s, color 0.3s;
+    user-select: none;
 }
 
-/* Стили для темно-фиолетовой темы */
+/* Прозрачные элементы и эффекты размытости */
 .dark-theme {
-    background-color: #1c1b29;
-    color: #ffffff;
+    background-color: rgba(28, 27, 41, 0.9);
+    backdrop-filter: blur(10px);
 }
 
 .main-container {
     height: 90vh;
     overflow: hidden;
     position: relative;
+    backdrop-filter: blur(5px);
+    background-color: rgba(45, 45, 70, 0.6);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* Плавные анимации для экрана и кнопок */
 .screen {
     display: none;
     padding: 20px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .screen.active {
     display: block;
+    opacity: 1;
+    transform: translateX(0);
 }
 
 /* Запрет выделения изображений */
@@ -79,20 +90,40 @@ img {
     color: #9f9fff;
 }
 
-/* Таймер */
-#countdown {
-    font-size: 24px;
-    margin: 20px 0;
+/* Кнопки бирж в аирдропе */
+.cryptobutton {
+    background-color: rgba(40, 40, 90, 0.6);
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    backdrop-filter: blur(5px);
 }
 
-/* Кнопки улучшений */
-.fluent-btn {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: none;
-    border-radius: 12px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 18px;
-    margin: 10px 0;
+.cryptobutton:hover {
+    background-color: rgba(60, 60, 120, 0.8);
+}
+
+/* Анимация "+1" */
+@keyframes float {
+    0% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
+
+.floating-text {
+    position: absolute;
+    color: #fff;
+    font-size: 24px;
+    text-shadow: 2px 2px 0 #000;
+    animation: float 1s ease-out forwards;
+    pointer-events: none;
 }
