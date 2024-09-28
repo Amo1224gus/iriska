@@ -13,6 +13,7 @@
         <div class="screen active" id="clicker-screen">
             <div class="clicker-container">
                 <h1 id="level-display">0</h1>
+                <p id="coins-display">Монеты: 0</p>
                 <img id="cat" src="/cat.png" alt="cat" class="cat-image" unselectable="on">
             </div>
         </div>
@@ -23,10 +24,12 @@
             <button id="buy-autoclicker" class="fluent-btn">
                 <i class="fas fa-mouse-pointer"></i>
                 <span>Автокликер (Цена: <span id="autoclicker-price">10</span>)</span>
+                <span class="cooldown-timer" id="autoclicker-timer"></span>
             </button>
             <button id="buy-multiplier" class="fluent-btn">
                 <i class="fas fa-chart-line"></i>
                 <span>Множитель (Цена: <span id="multiplier-price">50</span>)</span>
+                <span class="cooldown-timer" id="multiplier-timer"></span>
             </button>
         </div>
 
