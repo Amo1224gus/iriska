@@ -12,9 +12,19 @@
         <!-- Экран с кликером -->
         <div class="screen active" id="clicker-screen">
             <div class="clicker-container">
-                <h1 id="level-display">0</h1>
-                <p id="coins-display">Монеты: 0</p>
+                <h1 id="coins-display">0</h1>
                 <img id="cat" src="/cat.png" alt="cat" class="cat-image" unselectable="on">
+                <button id="info-button" class="info-btn">i</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно с информацией о кликах и улучшениях -->
+        <div class="modal" id="info-modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Информация</h2>
+                <p>Всего заработано: <span id="total-clicks-display">0</span></p>
+                <p>Всего потрачено на улучшения: <span id="total-upgrades-display">0</span></p>
             </div>
         </div>
 
@@ -43,10 +53,18 @@
         <div class="screen" id="listing-screen">
             <h2>Листинг 1 ноября 2024</h2>
             <div id="countdown"></div>
-            <p>На какие биржи можно вывести Ириску:</p>
-            <button class="cryptobutton">Binance</button>
-            <button class="cryptobutton">KuCoin</button>
-            <button class="cryptobutton">Coinbase</button>
+            <button class="cryptobutton binance-btn">
+                <span class="crypto-icon binance-icon"></span>
+                <span class="crypto-label">Binance</span>
+            </button>
+            <button class="cryptobutton kucoin-btn">
+                <span class="crypto-icon kucoin-icon"></span>
+                <span class="crypto-label">KuCoin</span>
+            </button>
+            <button class="cryptobutton coinbase-btn">
+                <span class="crypto-icon coinbase-icon"></span>
+                <span class="crypto-label">Coinbase</span>
+            </button>
         </div>
     </div>
 
