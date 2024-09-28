@@ -4,15 +4,42 @@ let autoclicksPerSecond = 0;
 let multiplier = 1;
 let autoclickerPrice = 10;
 let multiplierPrice = 50;
-let offlineClickerPrice = 500;
-let offlineAutoclicks = false;
-let telegramUserId = 12345; // Реальный ID пользователя Telegram
+let telegramUserId = '12345'; // ID пользователя Telegram (замените на реальный)
 let lastUpgradeTime = 0;
-const upgradeCooldown = 5000; // Время кулдауна в миллисекундах
+const upgradeCooldown = 5000; // Кулдаун улучшений
+const referralReward = 100; // Награда за приглашение друга
+
+// Загрузка сохраненных данных
+function loadProgress() {
+    const savedData = localStorage.getItem(`gameData_${telegramUserId}`);
+    if (savedData) {
+        const gameData = JSON.parse(savedData);
+        level = gameData.level;
+        coins = gameData.coins;
+        autoclicksPerSecond = gameData.autoclicksPerSecond;
+        multiplier = gameData.multiplier;
+        autoclickerPrice = gameData.autoclickerPrice;
+        multiplierPrice = gameData.multiplierPrice;
+        updateCoinsDisplay();
+    }
+}
+
+// Сохранение данных
+function saveProgress() {
+    localStorage.setItem(`gameData_${telegramUserId}`, JSON.stringify({
+        level,
+        coins,
+        autoclicksPerSecond,
+        multiplier,
+        autoclickerPrice,
+        multiplierPrice
+    }));
+}
 
 // Обновление отображения уровня и монет
 function updateCoinsDisplay() {
     document.getElementById("level-display").textContent = level;
+    document.getElementById("coins-display").textContent = coins;
 }
 
 // Клик по кошке с анимацией
@@ -21,6 +48,7 @@ cat.addEventListener("click", (event) => {
     level += multiplier;
     coins += multiplier;
     updateCoinsDisplay();
+    saveProgress();
 
     // Анимация "+1" рядом с местом клика
     const floatingText = document.createElement("div");
@@ -35,15 +63,7 @@ cat.addEventListener("click", (event) => {
     }, 1000);
 });
 
-// Переключение между экранами
-document.querySelectorAll('.nav-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-        document.getElementById(button.dataset.target).classList.add('active');
-    });
-});
-
-// Обработка покупки улучшений с кулдауном
+// Обработчик покупки улучшений с кулдауном
 function buyUpgrade(price, upgradeFunc) {
     const currentTime = Date.now();
     if (coins >= price && currentTime - lastUpgradeTime >= upgradeCooldown) {
@@ -51,6 +71,7 @@ function buyUpgrade(price, upgradeFunc) {
         upgradeFunc();
         lastUpgradeTime = currentTime;
         updateCoinsDisplay();
+        saveProgress();
     } else {
         alert("Недостаточно средств или время кулдауна не истекло.");
     }
@@ -74,44 +95,33 @@ document.getElementById("buy-multiplier").addEventListener("click", () => {
     });
 });
 
-// Покупка сонного автокликера
-document.getElementById("buy-offline-clicks").addEventListener("click", () => {
-    buyUpgrade(offlineClickerPrice, () => {
-        offlineAutoclicks = true;
-    });
-});
-
-// Автоклики
+// Автоклики каждые 1 секунду
 setInterval(() => {
     if (autoclicksPerSecond > 0) {
         level += autoclicksPerSecond;
         coins += autoclicksPerSecond;
         updateCoinsDisplay();
+        saveProgress();
     }
 }, 1000);
 
-// Включение сонного автокликера при неактивности
-window.addEventListener('mouseout', () => {
-    if (offlineAutoclicks) {
-        document.getElementById("level-display").textContent = "💤💤💤";
-    }
-});
-
-window.addEventListener('mouseover', () => {
-    if (offlineAutoclicks) {
-        document.getElementById("level-display").textContent = level;
-        alert(`Ночная муха заработала вам ${coins} кликов!`);
-    }
+// Переключение между экранами
+document.querySelectorAll('.nav-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+        document.getElementById(button.dataset.target).classList.add('active');
+    });
 });
 
 // Система рефералов
 function referFriend() {
     const referralLink = `https://example.com/game?ref=${telegramUserId}`;
-    alert(`Пригласите друга по ссылке: ${referralLink} и получите 100 кликов!`);
+    alert(`Пригласите друга по ссылке: ${referralLink} и получите ${referralReward} кликов!`);
 }
 
-// Получить награду за приглашение друга
+// Получение награды за реферала
 function claimReferralReward() {
-    level += 100;
+    level += referralReward;
     updateCoinsDisplay();
+    saveProgress();
 }
