@@ -1,4 +1,4 @@
-/* Fluent стиль для всего приложения */
+/* Основные стили Fluent Design */
 body {
     font-family: 'Lilita One', cursive;
     background-color: rgba(28, 27, 41, 0.9);
@@ -39,30 +39,67 @@ body {
     transform: translateX(0);
 }
 
-/* Запрет выделения изображений */
-img {
-    -webkit-user-drag: none;
-    user-select: none;
-}
-
-.clicker-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-
-#level-display {
-    font-size: 64px;
-    color: #fff;
-    margin-bottom: 20px;
-}
-
+/* Кнопка кошки подстраивается под экран */
 .cat-image {
     width: 100%;
-    max-width: 350px;
+    max-width: 400px;
+    height: auto;
     cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.cat-image:hover {
+    transform: scale(1.05);
+}
+
+/* Анимация "+1" */
+@keyframes float {
+    0% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
+
+.floating-text {
+    position: absolute;
+    color: #fff;
+    font-size: 24px;
+    text-shadow: 2px 2px 0 #000;
+    animation: float 1s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Кнопки улучшений */
+.fluent-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 18px;
+    color: #fff;
+    margin: 10px 0;
+    backdrop-filter: blur(10px);
+}
+
+.fluent-btn:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Таймер кулдауна */
+.cooldown-timer {
+    font-size: 14px;
+    color: #fff;
+    margin-top: 5px;
 }
 
 /* Нижняя панель */
@@ -106,25 +143,4 @@ img {
 
 .cryptobutton:hover {
     background-color: rgba(60, 60, 120, 0.8);
-}
-
-/* Анимация "+1" */
-@keyframes float {
-    0% {
-        opacity: 1;
-        transform: translateY(0px);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-}
-
-.floating-text {
-    position: absolute;
-    color: #fff;
-    font-size: 24px;
-    text-shadow: 2px 2px 0 #000;
-    animation: float 1s ease-out forwards;
-    pointer-events: none;
 }
