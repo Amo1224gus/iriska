@@ -1,200 +1,196 @@
-/* Основные стили Fluent Design */
-body {
-    font-family: 'Lilita One', cursive;
-    background-color: #000; /* Полностью черный фон */
-    color: #ffffff;
-    transition: background-color 0.3s, color 0.3s;
-    user-select: none;
-}
+let level = 0;
+let coins = 0;
+let autoclicksPerSecond = 0;
+let multiplier = 1;
+let autoclickerPrice = 10;
+let multiplierPrice = 50;
+let totalClicks = 0;
+let totalUpgradesSpent = 0;
+let telegramUserId = '12345'; // ID пользователя Telegram
+let lastUpgradeTime = 0;
+const upgradeCooldown = 5000; // Кулдаун
+let cooldowns = { autoclicker: 0, multiplier: 0 }; // Таймеры кулдауна
+let selectedSkin = "cat.png"; // Стандартный скин
 
-/* Прозрачные элементы и эффекты размытости */
-.dark-theme {
-    background-color: #000;
-}
-
-/* Центрирование текста */
-.center-text {
-    text-align: center;
-    font-size: 2em;
-}
-
-/* Панель и кнопки с градиентом */
-.fluent-btn, .cryptobutton {
-    background: linear-gradient(to top, #000 70%, #0078d4 30%); /* Черный с синим градиент */
-    border: none;
-    border-radius: 12px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 18px;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%; /* Подстраивается под ширину экрана */
-    max-width: 100%;
-}
-
-.cryptobutton {
-    margin: 10px 0;
-}
-
-.fluent-btn:hover, .cryptobutton:hover {
-    background-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Запрет выделения и перетаскивания кошки */
-img {
-    -webkit-user-drag: none;
-    user-select: none;
-    width: 70%; /* Подстроим под размер экрана */
-}
-
-/* Анимация "+1" */
-@keyframes float {
-    0% {
-        opacity: 1;
-        transform: translateY(0px);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-50px);
+// Загрузка прогресса
+function loadProgress() {
+    const savedData = localStorage.getItem(`gameData_${telegramUserId}`);
+    if (savedData) {
+        const gameData = JSON.parse(savedData);
+        level = gameData.level;
+        coins = gameData.coins;
+        autoclicksPerSecond = gameData.autoclicksPerSecond;
+        multiplier = gameData.multiplier;
+        autoclickerPrice = gameData.autoclickerPrice;
+        multiplierPrice = gameData.multiplierPrice;
+        totalClicks = gameData.totalClicks;
+        totalUpgradesSpent = gameData.totalUpgradesSpent;
+        selectedSkin = gameData.selectedSkin || "cat.png";
+        document.getElementById("cat").src = selectedSkin;
+        updateCoinsDisplay();
     }
 }
 
-.floating-text {
-    position: absolute;
-    color: #fff;
-    font-size: 24px;
-    text-shadow: 2px 2px 0 #000;
-    animation: float 1s ease-out forwards;
-    pointer-events: none;
+// Сохранение прогресса
+function saveProgress() {
+    localStorage.setItem(`gameData_${telegramUserId}`, JSON.stringify({
+        level,
+        coins,
+        autoclicksPerSecond,
+        multiplier,
+        autoclickerPrice,
+        multiplierPrice,
+        totalClicks,
+        totalUpgradesSpent,
+        selectedSkin
+    }));
 }
 
-/* Таймер кулдауна */
-.cooldown-timer {
-    font-size: 14px;
-    color: #fff;
-    margin-top: 5px;
+// Обновление монет и уровня
+function updateCoinsDisplay() {
+    document.getElementById("coins-display").textContent = `${coins}`;
+    document.getElementById("total-clicks-display").textContent = totalClicks;
+    document.getElementById("total-upgrades-display").textContent = totalUpgradesSpent;
 }
 
-/* Модальное окно */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    border-radius: 12px;
-    width: 80%;
-    max-width: 400px;
+// Клик по кошке
+const cat = document.getElementById("cat");
+cat.addEventListener("click", (event) => {
+    level += multiplier;
+    coins += multiplier;
+    totalClicks += multiplier;
+    updateCoinsDisplay();
+    saveProgress();
+
+    const floatingText = document.createElement("div");
+    floatingText.textContent = `+${multiplier}`;
+    floatingText.classList.add("floating-text");
+    floatingText.style.left = `${event.clientX}px`;
+    floatingText.style.top = `${event.clientY}px`;
+    document.body.appendChild(floatingText);
+
+    setTimeout(() => {
+        document.body.removeChild(floatingText);
+    }, 1000);
+});
+
+// Покупка улучшений с кулдауном
+function buyUpgrade(price, upgradeFunc, type) {
+    const currentTime = Date.now();
+    if (coins >= price && currentTime >= cooldowns[type]) {
+        coins -= price;
+        totalUpgradesSpent += price;
+        upgradeFunc();
+        cooldowns[type] = currentTime + upgradeCooldown;
+        updateCooldownTimer(type);
+        updateCoinsDisplay();
+        saveProgress();
+    } else {
+        alert("Недостаточно средств или кулдаун не завершён.");
+    }
 }
 
-.modal-content {
-    color: #fff;
+// Покупка автокликера
+document.getElementById("buy-autoclicker").addEventListener("click", () => {
+    buyUpgrade(autoclickerPrice, () => {
+        autoclicksPerSecond += 1;
+        autoclickerPrice = Math.floor(autoclickerPrice * 4); // Увеличение цены в 4 раза
+        document.getElementById("autoclicker-price").textContent = autoclickerPrice;
+    }, 'autoclicker');
+});
+
+// Покупка множителя
+document.getElementById("buy-multiplier").addEventListener("click", () => {
+    buyUpgrade(multiplierPrice, () => {
+        multiplier += 1;
+        multiplierPrice = Math.floor(multiplierPrice * 4); // Увеличение цены в 4 раза
+        document.getElementById("multiplier-price").textContent = multiplierPrice;
+    }, 'multiplier');
+});
+
+// Автоклики
+setInterval(() => {
+    if (autoclicksPerSecond > 0) {
+        level += autoclicksPerSecond;
+        coins += autoclicksPerSecond;
+        totalClicks += autoclicksPerSecond;
+        updateCoinsDisplay();
+        saveProgress();
+    }
+}, 1000);
+
+// Обновление таймеров кулдауна
+function updateCooldownTimer(type) {
+    const cooldownElement = document.getElementById(`${type}-timer`);
+    const interval = setInterval(() => {
+        const remainingTime = cooldowns[type] - Date.now();
+        if (remainingTime > 0) {
+            cooldownElement.textContent = `Осталось: ${Math.ceil(remainingTime / 1000)} сек`;
+        } else {
+            clearInterval(interval);
+            cooldownElement.textContent = '';
+        }
+    }, 1000);
 }
 
-.close-modal {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    font-size: 24px;
-    color: #fff;
+// Открытие/закрытие модального окна с информацией
+document.getElementById("info-button").addEventListener("click", () => {
+    document.getElementById("info-modal").style.display = "block";
+});
+
+document.querySelector(".close-modal").addEventListener("click", () => {
+    document.getElementById("info-modal").style.display = "none";
+});
+
+// Переключение между экранами
+document.querySelectorAll('.nav-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+        document.getElementById(button.dataset.target).classList.add('active');
+    });
+});
+
+// Загрузка скинов и добавление их в меню
+function loadSkins() {
+    const skinsContainer = document.querySelector('.skins-container');
+    skinsContainer.innerHTML = ''; // Очищаем контейнер перед добавлением скинов
+
+    const skinFiles = ["cat.png"]; // Стандартный скин
+
+    // Загружаем скины с префиксом "CSkin"
+    const availableSkins = ["CSkinTiger.png", "CSkinLeopard.png"]; // Пример списка доступных скинов (замените на реальные файлы)
+    
+    availableSkins.forEach(file => {
+        if (file.startsWith("CSkin")) {
+            const skinName = file.replace("CSkin", "").replace(".png", "");
+            skinFiles.push(file);
+        }
+    });
+
+    // Отображаем скины в интерфейсе
+    skinFiles.forEach(skin => {
+        const skinItem = document.createElement('div');
+        skinItem.classList.add('skin-item');
+        skinItem.innerHTML = `
+            <p class="${selectedSkin === skin ? 'selected' : ''}">${skin.replace("CSkin", "").replace(".png", "")}</p>
+            <img src="/${skin}" alt="${skin}">
+            <p>${selectedSkin === skin ? 'Выбран!' : 'Выбрать'}</p>
+        `;
+        
+        skinItem.addEventListener('click', () => {
+            selectedSkin = skin;
+            document.getElementById("cat").src = skin; // Обновляем скин кошки
+            loadSkins(); // Обновляем интерфейс
+            saveProgress();
+        });
+        
+        skinsContainer.appendChild(skinItem);
+    });
 }
 
-.close-modal:hover {
-    color: red;
-}
-
-/* Информационная кнопка "i" */
-.info-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #0078d4;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-/* Кнопка скинов "с" */
-.skins-btn {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: #0078d4;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-/* Нижняя панель */
-.bottom-panel {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: #2c2b3e;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-}
-
-.nav-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-.nav-btn:hover {
-    color: #9f9fff;
-}
-
-/* Контейнер для скинов */
-.skins-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 50px;
-}
-
-.skin-item {
-    width: 150px;
-    height: 200px;
-    background-color: #333;
-    border-radius: 12px;
-    text-align: center;
-    padding: 10px;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.skin-item img {
-    max-width: 100%;
-    height: auto;
-}
-
-.skin-item.selected {
-    border: 2px solid green;
-}
-
-.skin-item:hover {
-    transform: scale(1.05);
-}
+// При загрузке скинов
+document.getElementById("skins-button").addEventListener("click", () => {
+    loadSkins();
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    document.getElementById("skins-screen").classList.add('active');
+});
