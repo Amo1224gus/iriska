@@ -12,9 +12,10 @@
         <!-- Экран с кликером -->
         <div class="screen active" id="clicker-screen">
             <div class="clicker-container">
-                <h1 id="coins-display">0</h1>
+                <h1 id="coins-display" class="center-text">0</h1>
                 <img id="cat" src="/cat.png" alt="cat" class="cat-image" unselectable="on">
                 <button id="info-button" class="info-btn">i</button>
+                <button id="skins-button" class="skins-btn">с</button> <!-- Кнопка для выбора скинов -->
             </div>
         </div>
 
@@ -22,15 +23,24 @@
         <div class="modal" id="info-modal">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
-                <h2>Информация</h2>
+                <h2 class="center-text">Информация</h2>
                 <p>Всего заработано: <span id="total-clicks-display">0</span></p>
                 <p>Всего потрачено на улучшения: <span id="total-upgrades-display">0</span></p>
             </div>
         </div>
 
+        <!-- Экран скинов -->
+        <div class="screen" id="skins-screen">
+            <button class="back-btn">Назад</button> <!-- Кнопка назад -->
+            <button class="help-btn">?</button> <!-- Кнопка помощи -->
+            <div class="skins-container">
+                <!-- Здесь будут появляться скины -->
+            </div>
+        </div>
+
         <!-- Экран улучшений -->
         <div class="screen" id="upgrade-screen">
-            <h2>Улучшения</h2>
+            <h2 class="center-text">Улучшения</h2>
             <button id="buy-autoclicker" class="fluent-btn">
                 <i class="fas fa-mouse-pointer"></i>
                 <span>Автокликер (Цена: <span id="autoclicker-price">10</span>)</span>
@@ -45,13 +55,13 @@
 
         <!-- Экран мини-игр -->
         <div class="screen" id="mini-games-screen">
-            <h2>Скоро будет</h2>
+            <h2 class="center-text">Скоро будет</h2>
             <p>А пока можешь помурлыкать как Ириска!</p>
         </div>
 
         <!-- Экран листинга -->
         <div class="screen" id="listing-screen">
-            <h2>Листинг 1 ноября 2024</h2>
+            <h2 class="center-text">Листинг 1 ноября 2024</h2>
             <div id="countdown"></div>
             <button class="cryptobutton binance-btn">
                 <span class="crypto-icon binance-icon"></span>
