@@ -4,12 +4,12 @@ let autoclicksPerSecond = 0;
 let multiplier = 1;
 let autoclickerPrice = 10;
 let multiplierPrice = 50;
-let telegramUserId = '12345'; // ID пользователя Telegram (замените на реальный)
+let telegramUserId = '12345'; // ID пользователя Telegram
 let lastUpgradeTime = 0;
-const upgradeCooldown = 5000; // Кулдаун улучшений
-const referralReward = 100; // Награда за приглашение друга
+const upgradeCooldown = 5000; // Время кулдауна в миллисекундах
+let cooldowns = { autoclicker: 0, multiplier: 0 }; // Таймеры кулдауна
 
-// Загрузка сохраненных данных
+// Загрузка прогресса
 function loadProgress() {
     const savedData = localStorage.getItem(`gameData_${telegramUserId}`);
     if (savedData) {
@@ -24,7 +24,7 @@ function loadProgress() {
     }
 }
 
-// Сохранение данных
+// Сохранение прогресса
 function saveProgress() {
     localStorage.setItem(`gameData_${telegramUserId}`, JSON.stringify({
         level,
@@ -39,7 +39,7 @@ function saveProgress() {
 // Обновление отображения уровня и монет
 function updateCoinsDisplay() {
     document.getElementById("level-display").textContent = level;
-    document.getElementById("coins-display").textContent = coins;
+    document.getElementById("coins-display").textContent = `Монеты: ${coins}`;
 }
 
 // Клик по кошке с анимацией
@@ -63,17 +63,18 @@ cat.addEventListener("click", (event) => {
     }, 1000);
 });
 
-// Обработчик покупки улучшений с кулдауном
-function buyUpgrade(price, upgradeFunc) {
+// Покупка улучшений с кулдауном
+function buyUpgrade(price, upgradeFunc, type) {
     const currentTime = Date.now();
-    if (coins >= price && currentTime - lastUpgradeTime >= upgradeCooldown) {
+    if (coins >= price && currentTime >= cooldowns[type]) {
         coins -= price;
         upgradeFunc();
-        lastUpgradeTime = currentTime;
+        cooldowns[type] = currentTime + upgradeCooldown;
+        updateCooldownTimer(type);
         updateCoinsDisplay();
         saveProgress();
     } else {
-        alert("Недостаточно средств или время кулдауна не истекло.");
+        alert("Недостаточно средств или кулдаун не завершён.");
     }
 }
 
@@ -83,7 +84,7 @@ document.getElementById("buy-autoclicker").addEventListener("click", () => {
         autoclicksPerSecond += 1;
         autoclickerPrice = Math.floor(autoclickerPrice * 1.5);
         document.getElementById("autoclicker-price").textContent = autoclickerPrice;
-    });
+    }, 'autoclicker');
 });
 
 // Покупка множителя
@@ -92,10 +93,10 @@ document.getElementById("buy-multiplier").addEventListener("click", () => {
         multiplier += 1;
         multiplierPrice = Math.floor(multiplierPrice * 2);
         document.getElementById("multiplier-price").textContent = multiplierPrice;
-    });
+    }, 'multiplier');
 });
 
-// Автоклики каждые 1 секунду
+// Автоклики
 setInterval(() => {
     if (autoclicksPerSecond > 0) {
         level += autoclicksPerSecond;
@@ -104,6 +105,20 @@ setInterval(() => {
         saveProgress();
     }
 }, 1000);
+
+// Обновление таймеров кулдауна
+function updateCooldownTimer(type) {
+    const cooldownElement = document.getElementById(`${type}-timer`);
+    const interval = setInterval(() => {
+        const remainingTime = cooldowns[type] - Date.now();
+        if (remainingTime > 0) {
+            cooldownElement.textContent = `Осталось: ${Math.ceil(remainingTime / 1000)} сек`;
+        } else {
+            clearInterval(interval);
+            cooldownElement.textContent = '';
+        }
+    }, 1000);
+}
 
 // Переключение между экранами
 document.querySelectorAll('.nav-btn').forEach(button => {
@@ -116,12 +131,12 @@ document.querySelectorAll('.nav-btn').forEach(button => {
 // Система рефералов
 function referFriend() {
     const referralLink = `https://example.com/game?ref=${telegramUserId}`;
-    alert(`Пригласите друга по ссылке: ${referralLink} и получите ${referralReward} кликов!`);
+    alert(`Пригласите друга по ссылке: ${referralLink} и получите 100 кликов!`);
 }
 
 // Получение награды за реферала
 function claimReferralReward() {
-    level += referralReward;
+    level += 100;
     updateCoinsDisplay();
     saveProgress();
 }
