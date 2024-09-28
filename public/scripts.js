@@ -4,12 +4,14 @@ let autoclicksPerSecond = 0;
 let multiplier = 1;
 let autoclickerPrice = 10;
 let multiplierPrice = 50;
+let totalClicks = 0; // Все клики
+let totalUpgradesSpent = 0; // Все монеты потраченные на улучшения
 let telegramUserId = '12345'; // ID пользователя Telegram
 let lastUpgradeTime = 0;
-const upgradeCooldown = 5000; // Время кулдауна в миллисекундах
+const upgradeCooldown = 5000; // Кулдаун
 let cooldowns = { autoclicker: 0, multiplier: 0 }; // Таймеры кулдауна
 
-// Загрузка прогресса
+// Загрузка сохранений
 function loadProgress() {
     const savedData = localStorage.getItem(`gameData_${telegramUserId}`);
     if (savedData) {
@@ -20,6 +22,8 @@ function loadProgress() {
         multiplier = gameData.multiplier;
         autoclickerPrice = gameData.autoclickerPrice;
         multiplierPrice = gameData.multiplierPrice;
+        totalClicks = gameData.totalClicks;
+        totalUpgradesSpent = gameData.totalUpgradesSpent;
         updateCoinsDisplay();
     }
 }
@@ -32,25 +36,28 @@ function saveProgress() {
         autoclicksPerSecond,
         multiplier,
         autoclickerPrice,
-        multiplierPrice
+        multiplierPrice,
+        totalClicks,
+        totalUpgradesSpent
     }));
 }
 
-// Обновление отображения уровня и монет
+// Обновление монет и уровня
 function updateCoinsDisplay() {
-    document.getElementById("level-display").textContent = level;
     document.getElementById("coins-display").textContent = `Монеты: ${coins}`;
+    document.getElementById("total-clicks-display").textContent = totalClicks;
+    document.getElementById("total-upgrades-display").textContent = totalUpgradesSpent;
 }
 
-// Клик по кошке с анимацией
+// Клик по кошке
 const cat = document.getElementById("cat");
 cat.addEventListener("click", (event) => {
     level += multiplier;
     coins += multiplier;
+    totalClicks += multiplier;
     updateCoinsDisplay();
     saveProgress();
 
-    // Анимация "+1" рядом с местом клика
     const floatingText = document.createElement("div");
     floatingText.textContent = `+${multiplier}`;
     floatingText.classList.add("floating-text");
@@ -68,6 +75,7 @@ function buyUpgrade(price, upgradeFunc, type) {
     const currentTime = Date.now();
     if (coins >= price && currentTime >= cooldowns[type]) {
         coins -= price;
+        totalUpgradesSpent += price;
         upgradeFunc();
         cooldowns[type] = currentTime + upgradeCooldown;
         updateCooldownTimer(type);
@@ -101,6 +109,7 @@ setInterval(() => {
     if (autoclicksPerSecond > 0) {
         level += autoclicksPerSecond;
         coins += autoclicksPerSecond;
+        totalClicks += autoclicksPerSecond;
         updateCoinsDisplay();
         saveProgress();
     }
@@ -119,6 +128,15 @@ function updateCooldownTimer(type) {
         }
     }, 1000);
 }
+
+// Открытие/закрытие модального окна с информацией
+document.getElementById("info-button").addEventListener("click", () => {
+    document.getElementById("info-modal").style.display = "block";
+});
+
+document.querySelector(".close-modal").addEventListener("click", () => {
+    document.getElementById("info-modal").style.display = "none";
+});
 
 // Переключение между экранами
 document.querySelectorAll('.nav-btn').forEach(button => {
