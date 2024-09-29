@@ -1,91 +1,29 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кликер - Кошка</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
-</head>
-<body class="dark-theme">
-    <div class="main-container">
-        <!-- Экран с кликером -->
-        <div class="screen active" id="clicker-screen">
-            <div class="clicker-container">
-                <h1 id="coins-display" class="center-text">0</h1>
-                <img id="cat" src="/cat.png" alt="cat" class="cat-image" unselectable="on">
-                <button id="info-button" class="info-btn">i</button>
-                <button id="skins-button" class="skins-btn">с</button> <!-- Кнопка для выбора скинов -->
-            </div>
-        </div>
+<html>
+<title>Clicker Clicker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-        <!-- Модальное окно с информацией о кликах и улучшениях -->
-        <div class="modal" id="info-modal">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h2 class="center-text">Информация</h2>
-                <p>Всего заработано: <span id="total-clicks-display">0</span></p>
-                <p>Всего потрачено на улучшения: <span id="total-upgrades-display">0</span></p>
-            </div>
-        </div>
-
-        <!-- Экран скинов -->
-        <div class="screen" id="skins-screen">
-            <button class="back-btn">Назад</button> <!-- Кнопка назад -->
-            <button class="help-btn">?</button> <!-- Кнопка помощи -->
-            <div class="skins-container">
-                <!-- Здесь будут появляться скины -->
-            </div>
-        </div>
-
-        <!-- Экран улучшений -->
-        <div class="screen" id="upgrade-screen">
-            <h2 class="center-text">Улучшения</h2>
-            <button id="buy-autoclicker" class="fluent-btn">
-                <i class="fas fa-mouse-pointer"></i>
-                <span>Автокликер (Цена: <span id="autoclicker-price">10</span>)</span>
-                <span class="cooldown-timer" id="autoclicker-timer"></span>
-            </button>
-            <button id="buy-multiplier" class="fluent-btn">
-                <i class="fas fa-chart-line"></i>
-                <span>Множитель (Цена: <span id="multiplier-price">50</span>)</span>
-                <span class="cooldown-timer" id="multiplier-timer"></span>
-            </button>
-        </div>
-
-        <!-- Экран мини-игр -->
-        <div class="screen" id="mini-games-screen">
-            <h2 class="center-text">Скоро будет</h2>
-            <p>А пока можешь помурлыкать как Ириска!</p>
-        </div>
-
-        <!-- Экран листинга -->
-        <div class="screen" id="listing-screen">
-            <h2 class="center-text">Листинг 1 ноября 2024</h2>
-            <div id="countdown"></div>
-            <button class="cryptobutton binance-btn">
-                <span class="crypto-icon binance-icon"></span>
-                <span class="crypto-label">Binance</span>
-            </button>
-            <button class="cryptobutton kucoin-btn">
-                <span class="crypto-icon kucoin-icon"></span>
-                <span class="crypto-label">KuCoin</span>
-            </button>
-            <button class="cryptobutton coinbase-btn">
-                <span class="crypto-icon coinbase-icon"></span>
-                <span class="crypto-label">Coinbase</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Нижняя панель для навигации -->
-    <div class="bottom-panel">
-        <button class="nav-btn" data-target="clicker-screen">Кликер</button>
-        <button class="nav-btn" data-target="upgrade-screen">Улучшения</button>
-        <button class="nav-btn" data-target="mini-games-screen">Мини игры</button>
-        <button class="nav-btn" data-target="listing-screen">Листинг</button>
-    </div>
-
-    <script src="/scripts.js"></script>
+<body onbeforeunload="return closingCode()">
+  <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
+  <div class='topbar'>
+    <a href='http://leemlam.github.io'>Clicker Clicker</a>
+  </div>
+    <center class='center'>
+      <h1 id='total'>LB: 0</h1>
+      <h5 id="click" style="font-family:trebuchet MS;">LB/click: 1 | LB/sec: 0</h5>
+      <img class="round" src="https://decostones.ie/wp-content/uploads/2015/11/click-hand.png" width="150" onclick='clicked()'></img>
+      <br><br>
+      <button id='upgrade' class="round" onclick='upgrade("upgrade")' style="font-family:courier;">0-main upgrade: 15</button>
+      <br><br>
+      <button id='cat' class="round" onclick='upgrade("clicker cat")' style="font-family:courier;">0-clicker cat: 25 | +1/sec</button>
+      <br><br>
+      <button id='worker' class="round" onclick='upgrade("worker")' style="font-family:courier;">0-worker: 250 | +15/sec</button><br><br>
+      <button class="settings" onclick="save()">Save</button>
+      <button class="settings" onclick="load()">Load</button>
+      <button class="settings" onclick="reset()">Reset</button><br><br>
+    </center>
+  </link>
 </body>
+</meta>
+
 </html>
