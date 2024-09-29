@@ -1,196 +1,223 @@
-let level = 0;
-let coins = 0;
-let autoclicksPerSecond = 0;
-let multiplier = 1;
-let autoclickerPrice = 10;
-let multiplierPrice = 50;
-let totalClicks = 0;
-let totalUpgradesSpent = 0;
-let telegramUserId = '12345'; // ID пользователя Telegram
-let lastUpgradeTime = 0;
-const upgradeCooldown = 5000; // Кулдаун
-let cooldowns = { autoclicker: 0, multiplier: 0 }; // Таймеры кулдауна
-let selectedSkin = "cat.png"; // Стандартный скин
+money = 0;
+moneyup = 1;
+msec = 0;
+upcost = 15;
+catcost = 25;
+workercost = 250;
+upown = 0;
+catown = 0;
+workerown = 0;
+catadd = 1;
+workadd = 15;
+cboost = 1;
+wboost = 1;
+catmax = 0;
+workmax = 0;
 
-// Загрузка прогресса
-function loadProgress() {
-    const savedData = localStorage.getItem(`gameData_${telegramUserId}`);
-    if (savedData) {
-        const gameData = JSON.parse(savedData);
-        level = gameData.level;
-        coins = gameData.coins;
-        autoclicksPerSecond = gameData.autoclicksPerSecond;
-        multiplier = gameData.multiplier;
-        autoclickerPrice = gameData.autoclickerPrice;
-        multiplierPrice = gameData.multiplierPrice;
-        totalClicks = gameData.totalClicks;
-        totalUpgradesSpent = gameData.totalUpgradesSpent;
-        selectedSkin = gameData.selectedSkin || "cat.png";
-        document.getElementById("cat").src = selectedSkin;
-        updateCoinsDisplay();
+//save before exiting
+function closingCode() {
+  if (confirm("You have closed the window, would you like to save?") === true) {
+    save();
+    return null;
+  }
+}
+
+function addcomma(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+//updates all values
+function reloadall() {
+  document.getElementById("click").innerHTML =
+    "LB/click: " + addcomma(moneyup) + " | LB/sec: " + addcomma(msec);
+  document.getElementById("total").innerHTML = "LB: " + addcomma(money);
+  document.getElementById("cat").innerHTML =
+    catown + "-clicker cat: " + addcomma(catcost) + " | +" + addcomma(catadd) + "/sec";
+  document.getElementById("worker").innerHTML =
+    workerown + "-worker: " + addcomma(workercost) + " | +" + addcomma(workadd) + "/sec";
+  document.getElementById("upgrade").innerHTML =
+    addcomma(upown) + "-main upgrade: " + addcomma(upcost);
+}
+//overwrites save file
+function save() {
+  localStorage.setItem("money", money);
+  localStorage.setItem("moneyup", moneyup);
+  localStorage.setItem("msec", msec);
+  localStorage.setItem("upcost", upcost);
+  localStorage.setItem("catcost", catcost);
+  localStorage.setItem("catadd", catadd);
+  localStorage.setItem("workercost", workercost);
+  localStorage.setItem("workadd", workadd);
+  localStorage.setItem("catown", catown);
+  localStorage.setItem("workerown", workerown);
+  localStorage.setItem("upown", upown);
+  localStorage.setItem("catadd", catadd);
+  localStorage.setItem("workadd", workadd);
+  localStorage.setItem("cboost", cboost);
+  localStorage.setItem("wboost", wboost);
+  localStorage.setItem("catmax", catmax);
+  localStorage.setItem("workmax", workmax);
+}
+//loads save file
+function load() {
+  money = parseInt(localStorage.getItem("money"));
+  moneyup = parseInt(localStorage.getItem("moneyup"));
+  msec = parseInt(localStorage.getItem("msec"));
+  upcost = parseInt(localStorage.getItem("upcost"));
+  catcost = parseInt(localStorage.getItem("catcost"));
+  upown = parseInt(localStorage.getItem("catadd"));
+  workercost = parseInt(localStorage.getItem("workercost"));
+  upown = parseInt(localStorage.getItem("workadd"));
+  catown = parseInt(localStorage.getItem("catown"));
+  workerown = parseInt(localStorage.getItem("workerown"));
+  upown = parseInt(localStorage.getItem("upown"));
+  catadd = parseInt(localStorage.getItem("catadd"));
+  workadd = parseInt(localStorage.getItem("workadd"));
+  cboost = parseInt(localStorage.getItem("cboost"));
+  wboost = parseInt(localStorage.getItem("wboost"));
+  catmax = parseInt(localStorage.getItem("catmax"));
+  workmax = parseInt(localStorage.getItem("workmax"));
+
+  reloadall();
+}
+//resets all values
+function reset() {
+  if (confirm("Are you sure you want to reset?") === true) {
+    money = 0;
+    moneyup = 1;
+    msec = 0;
+    upcost = 15;
+    catcost = 25;
+    workercost = 250;
+    catown = 0;
+    workerown = 0;
+    upown = 0;
+    catadd = 1;
+    workadd = 15;
+    reloadall();
+  }
+}
+//timer
+function myTimer() {
+    money += msec;
+  document.getElementById("total").innerHTML = "LB: " + addcomma(money);
+}
+setInterval(myTimer, 1000);
+
+//what happens when button is clicked
+function clicked() {
+  money += moneyup;
+  document.getElementById("total").innerHTML = "LB: " + addcomma(money);
+}
+//upgrade function
+function upgrade(name) {
+  if (name == "clicker cat") {
+    if (money >= catcost && catown < 50) {
+      
+      if (catown <= 13) {
+        msec += catadd;
+        catadd++;
+        cboost = 1;
+      } else if (catown == 14) {
+        msec += catadd;
+        catadd++;
+        cboost = 200;
+      } else if (catown <= 23) {
+        msec += 200 * catadd;
+        catadd++;
+        cboost = 200;
+      } else if (catown == 24) {
+        msec += 200 * catadd;
+        catadd++;
+        cboost = 5000;
+      } else if (catown <= 48) {
+        msec += 5000 * catadd;
+        catadd++;
+        cboost = 5000;
+      } else if (catown == 49) {
+        msec += 5000 * catadd;
+        catadd++;
+        cboost = 15000;
+      } else {
+        msec += 15000 * catadd;
+        catadd++;
+        cboost = 15000;
+      }
+      catown += 1;
+      money -= catcost;
+      catcost = catcost * 2;
+      document.getElementById("cat").innerHTML =
+        catown + "-clicker cat: " + addcomma(catcost) + " | +" + addcomma(catadd * cboost) + "/sec";
+    } else if (catown == 50) {
+      document.getElementById("cat").innerHTML =
+        catown + "-clicker cat: MAX | +15% click/sec";
     }
-}
+  }
 
-// Сохранение прогресса
-function saveProgress() {
-    localStorage.setItem(`gameData_${telegramUserId}`, JSON.stringify({
-        level,
-        coins,
-        autoclicksPerSecond,
-        multiplier,
-        autoclickerPrice,
-        multiplierPrice,
-        totalClicks,
-        totalUpgradesSpent,
-        selectedSkin
-    }));
-}
-
-// Обновление монет и уровня
-function updateCoinsDisplay() {
-    document.getElementById("coins-display").textContent = `${coins}`;
-    document.getElementById("total-clicks-display").textContent = totalClicks;
-    document.getElementById("total-upgrades-display").textContent = totalUpgradesSpent;
-}
-
-// Клик по кошке
-const cat = document.getElementById("cat");
-cat.addEventListener("click", (event) => {
-    level += multiplier;
-    coins += multiplier;
-    totalClicks += multiplier;
-    updateCoinsDisplay();
-    saveProgress();
-
-    const floatingText = document.createElement("div");
-    floatingText.textContent = `+${multiplier}`;
-    floatingText.classList.add("floating-text");
-    floatingText.style.left = `${event.clientX}px`;
-    floatingText.style.top = `${event.clientY}px`;
-    document.body.appendChild(floatingText);
-
-    setTimeout(() => {
-        document.body.removeChild(floatingText);
-    }, 1000);
-});
-
-// Покупка улучшений с кулдауном
-function buyUpgrade(price, upgradeFunc, type) {
-    const currentTime = Date.now();
-    if (coins >= price && currentTime >= cooldowns[type]) {
-        coins -= price;
-        totalUpgradesSpent += price;
-        upgradeFunc();
-        cooldowns[type] = currentTime + upgradeCooldown;
-        updateCooldownTimer(type);
-        updateCoinsDisplay();
-        saveProgress();
-    } else {
-        alert("Недостаточно средств или кулдаун не завершён.");
+  if (name == "worker") {
+    if (money >= workercost && workerown < 50) {
+      
+      if (workerown <= 13) {
+        msec += workadd;
+        workadd++;
+        wboost = 1;
+      } else if (workerown == 14) {
+        msec += workadd;
+        workadd++;
+        wboost = 200;
+      } else if (workerown <= 23) {
+        msec += 200 * workadd;
+        workadd++;
+        wboost = 200;
+      } else if (workerown == 24) {
+        msec += 200 * workadd;
+        workadd++;
+        wboost = 5000;
+      } else if (workerown <= 48) {
+        msec += 5000 * workadd;
+        workadd++;
+        wboost = 5000;
+      } else if (workerown == 49) {
+        msec += 5000 * workadd;
+        workadd++;
+        wboost = 15000;
+      } else {
+        msec += 15000 * workadd;
+        workadd++;
+        wboost = 15000;
+      }
+      workerown += 1;
+      money -= workercost;
+      workercost = workercost * 3;
+      document.getElementById("worker").innerHTML = 
+        workerown + "-worker: " + addcomma(workercost) + " | +" + addcomma(workadd * wboost) + "/sec";
+    } else if (workerown == 50) {
+      document.getElementById("worker").innerHTML =
+        workerown + "-worker: MAX | +35% click/sec";
     }
-}
+  }
 
-// Покупка автокликера
-document.getElementById("buy-autoclicker").addEventListener("click", () => {
-    buyUpgrade(autoclickerPrice, () => {
-        autoclicksPerSecond += 1;
-        autoclickerPrice = Math.floor(autoclickerPrice * 4); // Увеличение цены в 4 раза
-        document.getElementById("autoclicker-price").textContent = autoclickerPrice;
-    }, 'autoclicker');
-});
-
-// Покупка множителя
-document.getElementById("buy-multiplier").addEventListener("click", () => {
-    buyUpgrade(multiplierPrice, () => {
-        multiplier += 1;
-        multiplierPrice = Math.floor(multiplierPrice * 4); // Увеличение цены в 4 раза
-        document.getElementById("multiplier-price").textContent = multiplierPrice;
-    }, 'multiplier');
-});
-
-// Автоклики
-setInterval(() => {
-    if (autoclicksPerSecond > 0) {
-        level += autoclicksPerSecond;
-        coins += autoclicksPerSecond;
-        totalClicks += autoclicksPerSecond;
-        updateCoinsDisplay();
-        saveProgress();
+  if (name == "upgrade") {
+    if (money >= upcost) {
+      moneyup += upcost / 15;
+      money -= upcost;
+      upown += 1;
+      upcost = upcost * 5;
+      document.getElementById("upgrade").innerHTML =
+        addcomma(upown) + "-main upgrade: " + addcomma(upcost);
+      if (catown == 50) {
+        msec -= catmax;
+        catmax = Math.floor(moneyup * 0.15);
+        msec += catmax;
+      }
+      if (workerown == 50) {
+        msec -= workmax;
+        workmax = Math.floor(moneyup * 0.35);
+        msec += workmax;
+      }
     }
-}, 1000);
+  }
 
-// Обновление таймеров кулдауна
-function updateCooldownTimer(type) {
-    const cooldownElement = document.getElementById(`${type}-timer`);
-    const interval = setInterval(() => {
-        const remainingTime = cooldowns[type] - Date.now();
-        if (remainingTime > 0) {
-            cooldownElement.textContent = `Осталось: ${Math.ceil(remainingTime / 1000)} сек`;
-        } else {
-            clearInterval(interval);
-            cooldownElement.textContent = '';
-        }
-    }, 1000);
+  document.getElementById("click").innerHTML =
+    "LB/click: " + addcomma(moneyup) + " | LB/sec: " + addcomma(msec);
+  document.getElementById("total").innerHTML = "LB: " + addcomma(money);
 }
-
-// Открытие/закрытие модального окна с информацией
-document.getElementById("info-button").addEventListener("click", () => {
-    document.getElementById("info-modal").style.display = "block";
-});
-
-document.querySelector(".close-modal").addEventListener("click", () => {
-    document.getElementById("info-modal").style.display = "none";
-});
-
-// Переключение между экранами
-document.querySelectorAll('.nav-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-        document.getElementById(button.dataset.target).classList.add('active');
-    });
-});
-
-// Загрузка скинов и добавление их в меню
-function loadSkins() {
-    const skinsContainer = document.querySelector('.skins-container');
-    skinsContainer.innerHTML = ''; // Очищаем контейнер перед добавлением скинов
-
-    const skinFiles = ["cat.png"]; // Стандартный скин
-
-    // Загружаем скины с префиксом "CSkin"
-    const availableSkins = ["CSkinTiger.png", "CSkinLeopard.png"]; // Пример списка доступных скинов (замените на реальные файлы)
-    
-    availableSkins.forEach(file => {
-        if (file.startsWith("CSkin")) {
-            const skinName = file.replace("CSkin", "").replace(".png", "");
-            skinFiles.push(file);
-        }
-    });
-
-    // Отображаем скины в интерфейсе
-    skinFiles.forEach(skin => {
-        const skinItem = document.createElement('div');
-        skinItem.classList.add('skin-item');
-        skinItem.innerHTML = `
-            <p class="${selectedSkin === skin ? 'selected' : ''}">${skin.replace("CSkin", "").replace(".png", "")}</p>
-            <img src="/${skin}" alt="${skin}">
-            <p>${selectedSkin === skin ? 'Выбран!' : 'Выбрать'}</p>
-        `;
-        
-        skinItem.addEventListener('click', () => {
-            selectedSkin = skin;
-            document.getElementById("cat").src = skin; // Обновляем скин кошки
-            loadSkins(); // Обновляем интерфейс
-            saveProgress();
-        });
-        
-        skinsContainer.appendChild(skinItem);
-    });
-}
-
-// При загрузке скинов
-document.getElementById("skins-button").addEventListener("click", () => {
-    loadSkins();
-    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-    document.getElementById("skins-screen").classList.add('active');
-});
