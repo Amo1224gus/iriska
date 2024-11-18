@@ -91,10 +91,14 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 1.2rem;
+            transition: background-color 0.3s;
         }
         .upgrade.disabled {
             background-color: #555;
             cursor: not-allowed;
+        }
+        .upgrade.active {
+            background-color: #28a745;
         }
         #toggleMenu {
             position: fixed;
@@ -143,6 +147,12 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        #boostIndicator {
+            font-size: 1.5rem;
+            color: #28a745;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -157,6 +167,7 @@
         <div id="toggleMenu">⇧</div>
         <div id="themeToggle">🌙</div>
         <div id="rainbowCat"></div>
+        <div id="boostIndicator">Boost Active! (10 seconds)</div>
     </div>
 
     <script>
@@ -177,6 +188,7 @@
         const toggleMenu = document.getElementById("toggleMenu");
         const themeToggle = document.getElementById("themeToggle");
         const rainbowCat = document.getElementById("rainbowCat");
+        const boostIndicator = document.getElementById("boostIndicator");
 
         if (theme === "dark") {
             document.body.classList.add("dark");
@@ -195,6 +207,22 @@
         function updateScoreDisplay() {
             scoreDisplay.textContent = `Clicks: ${score}`;
             saveState();
+        }
+
+        function updateUpgradeButtons() {
+            document.getElementById("multiplierUpgrade").textContent = `Multiplier (${multiplierCost} coins)`;
+            document.getElementById("autoClickerUpgrade").textContent = `Auto Clicker (${autoClickerCost} coins)`;
+
+            const multiplierButton = document.getElementById("multiplierUpgrade");
+            const autoClickerButton = document.getElementById("autoClickerUpgrade");
+
+            // Enable or disable the buttons based on current score
+            multiplierButton.classList.toggle("disabled", score < multiplierCost);
+            autoClickerButton.classList.toggle("disabled", score < autoClickerCost || autoClickerCount >= 10);
+
+            // If score is enough, change the color of the button to active
+            multiplierButton.classList.toggle("active", score >= multiplierCost);
+            autoClickerButton.classList.toggle("active", score >= autoClickerCost && autoClickerCount < 10);
         }
 
         cat.addEventListener("click", () => {
@@ -221,22 +249,13 @@
             saveState();
         });
 
-        function updateUpgradeButtons() {
-            document.getElementById("multiplierUpgrade").textContent = `Multiplier (${multiplierCost} coins)`;
-            document.getElementById("autoClickerUpgrade").textContent = `Auto Clicker (${autoClickerCost} coins)`;
-
-            // Enable or disable the buttons based on current score
-            document.getElementById("multiplierUpgrade").classList.toggle("disabled", score < multiplierCost);
-            document.getElementById("autoClickerUpgrade").classList.toggle("disabled", score < autoClickerCost || autoClickerCount >= 10);
-        }
-
         document.getElementById("multiplierUpgrade").addEventListener("click", () => {
             if (score >= multiplierCost) {
                 score -= multiplierCost;
                 multiplier *= 2;
                 multiplierCost *= 2;
-                updateScoreDisplay();
                 updateUpgradeButtons();
+                updateScoreDisplay();
             }
         });
 
@@ -244,9 +263,9 @@
             if (score >= autoClickerCost && autoClickerCount < 10) {
                 score -= autoClickerCost;
                 autoClickerCount++;
-                autoClickerCost *= 2;
-                updateScoreDisplay();
+                autoClickerCost = Math.floor(autoClickerCost * 1.5);
                 updateUpgradeButtons();
+                updateScoreDisplay();
                 startAutoClicker();
             }
         });
@@ -265,9 +284,11 @@
                 isRainbowActive = true;
                 rainbowCat.style.display = "none";
                 multiplier *= 5;
+                boostIndicator.style.display = "block"; // Show boost indicator
                 setTimeout(() => {
                     multiplier /= 5;
                     isRainbowActive = false;
+                    boostIndicator.style.display = "none"; // Hide boost indicator
                 }, 10000);
             }
         });
