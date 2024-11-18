@@ -31,6 +31,7 @@
             width: 150px;
             cursor: pointer;
             transition: transform 0.1s ease;
+            -webkit-user-drag: none;
         }
         #cat:active {
             transform: scale(1.1);
@@ -42,24 +43,23 @@
         }
         #menuOverlay {
             position: absolute;
-            bottom: -50%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            height: 50%;
+            top: 0;
+            right: -40%;
+            width: 40%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.9);
             color: white;
-            border-radius: 10px;
-            display: none;
+            border-radius: 10px 0 0 10px;
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
             transition: all 0.5s;
+            z-index: 5;
         }
         #menuOverlay.show {
-            display: flex;
-            bottom: 10%;
+            right: 0;
         }
         .upgrade {
             padding: 15px 25px;
@@ -75,21 +75,42 @@
             background-color: #555;
             cursor: not-allowed;
         }
-        #banScreen {
+        #banNotification {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(255, 0, 0, 0.8);
             color: white;
-            text-align: center;
+            padding: 20px;
+            border-radius: 5px;
             display: none;
-            flex-direction: column;
+            z-index: 10;
+            font-size: 1.2rem;
+        }
+        #toggleMenu {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            background-color: #444;
+            color: white;
+            border-radius: 5px 0 0 5px;
+            display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3rem;
+            font-size: 1.5rem;
+            cursor: pointer;
             z-index: 10;
+            transform: translateY(-50%);
+        }
+        #toggleMenu.bottom {
+            top: unset;
+            bottom: 0;
+            right: 50%;
+            transform: translate(50%, 0);
+            border-radius: 5px 5px 0 0;
         }
         #themeToggle {
             position: fixed;
@@ -108,17 +129,6 @@
             cursor: pointer;
             z-index: 5;
         }
-        .rainbow {
-            animation: rainbow 2s infinite;
-        }
-        @keyframes rainbow {
-            0% { color: red; }
-            20% { color: orange; }
-            40% { color: yellow; }
-            60% { color: green; }
-            80% { color: blue; }
-            100% { color: purple; }
-        }
     </style>
 </head>
 <body>
@@ -132,78 +142,63 @@
             <button class="upgrade" id="autoClickerUpgrade" data-cost="200">Auto Clicker (200 coins)</button>
             <button class="upgrade" id="rainbowUpgrade" data-cost="500">Rainbow Streak (500 coins)</button>
         </div>
-    </div>
-    <div id="banScreen">
-        <p>You have been banned for cheating!</p>
-        <p id="banTimer">10</p>
+        <div id="toggleMenu">➤</div>
+        <div id="banNotification">Cheating detected! Ban ends in <span id="banTimer">10</span>s</div>
     </div>
     <script>
         let score = parseInt(localStorage.getItem("score")) || 0;
         let multiplier = 1;
         let autoClicker = false;
-        let rainbowActive = false;
-        let rainbowChance = 0.1;
-        let rainbowDuration = 10;
-        let rainbowCooldown = false;
         let banDuration = 10;
+        let isBanned = false;
         const scoreDisplay = document.getElementById("score");
         const cat = document.getElementById("cat");
-        const banScreen = document.getElementById("banScreen");
+        const menuOverlay = document.getElementById("menuOverlay");
+        const toggleMenu = document.getElementById("toggleMenu");
+        const banNotification = document.getElementById("banNotification");
         const banTimerDisplay = document.getElementById("banTimer");
         const themeToggle = document.getElementById("themeToggle");
-        const menuOverlay = document.getElementById("menuOverlay");
-        const upgrades = document.querySelectorAll(".upgrade");
 
         function updateScoreDisplay() {
             scoreDisplay.textContent = `Clicks: ${score}`;
-            if (rainbowActive) scoreDisplay.classList.add("rainbow");
-            else scoreDisplay.classList.remove("rainbow");
             localStorage.setItem("score", score);
         }
 
-        function showMenu() {
-            menuOverlay.classList.add("show");
+        function toggleMenuVisibility() {
+            menuOverlay.classList.toggle("show");
         }
 
-        function hideMenu() {
-            menuOverlay.classList.remove("show");
+        function showBanNotification() {
+            isBanned = true;
+            banNotification.style.display = "block";
+            let timer = banDuration;
+            const interval = setInterval(() => {
+                timer -= 1;
+                banTimerDisplay.textContent = timer;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    banNotification.style.display = "none";
+                    isBanned = false;
+                    banDuration *= 2; // Увеличиваем бан вдвое
+                }
+            }, 1000);
         }
 
         cat.addEventListener("click", () => {
-            if (rainbowCooldown) return;
+            if (isBanned) return;
             score += multiplier;
             updateScoreDisplay();
         });
 
-        document.body.addEventListener("touchstart", (e) => {
-            if (e.touches[0].clientY > window.innerHeight * 0.5) showMenu();
-        });
-
-        document.body.addEventListener("mousedown", (e) => {
-            if (e.clientX > window.innerWidth * 0.8) showMenu();
-        });
-
-        document.body.addEventListener("mouseup", hideMenu);
-        document.body.addEventListener("touchend", hideMenu);
-
-        upgrades.forEach((upgrade) => {
-            upgrade.addEventListener("click", () => {
-                const cost = parseInt(upgrade.dataset.cost);
-                if (score >= cost) {
-                    score -= cost;
-                    updateScoreDisplay();
-                    upgrade.dataset.cost = Math.round(cost * 1.5);
-                    upgrade.textContent = `${upgrade.textContent.split("(")[0]} (${upgrade.dataset.cost} coins)`;
-                } else {
-                    alert("Not enough coins!");
-                }
-            });
-        });
+        toggleMenu.addEventListener("click", toggleMenuVisibility);
 
         themeToggle.addEventListener("click", () => {
             document.body.classList.toggle("dark");
             themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
         });
+
+        document.body.addEventListener("mousedown", (e) => e.preventDefault());
+        document.body.addEventListener("touchstart", (e) => e.preventDefault());
 
         updateScoreDisplay();
     </script>
