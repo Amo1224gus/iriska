@@ -167,6 +167,8 @@
         let theme = localStorage.getItem("theme") || "light";
         let isRainbowActive = false;
         let lastClickTime = 0;
+        let rainbowTimer = null;
+        let autoClickerInterval = null;
 
         const scoreDisplay = document.getElementById("score");
         const cat = document.getElementById("cat");
@@ -235,19 +237,45 @@
                 autoClickerCost *= 2;
                 updateScoreDisplay();
                 document.getElementById("autoClickerUpgrade").textContent = `Auto Clicker (${autoClickerCost} coins)`;
+                startAutoClicker();
+            }
+        });
+
+        function startAutoClicker() {
+            if (autoClickerInterval) return;
+            autoClickerInterval = setInterval(() => {
+                score += multiplier;
+                updateScoreDisplay();
+            }, 1000);
+        }
+
+        function stopAutoClicker() {
+            clearInterval(autoClickerInterval);
+            autoClickerInterval = null;
+        }
+
+        rainbowCat.addEventListener("click", () => {
+            if (!isRainbowActive) {
+                isRainbowActive = true;
+                multiplier *= 5;
+                rainbowCat.style.display = "none";
+                setTimeout(() => {
+                    multiplier /= 5;
+                    isRainbowActive = false;
+                }, 10000);
             }
         });
 
         setInterval(() => {
-            if (!rainbowCat.style.display) {
+            if (!isRainbowActive) {
                 const randomPos = {
-                    x: Math.random() * (window.innerWidth - 50),
-                    y: Math.random() * (window.innerHeight - 50),
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight
                 };
                 rainbowCat.style.left = randomPos.x + 'px';
                 rainbowCat.style.top = randomPos.y + 'px';
                 rainbowCat.style.display = "block";
-                setTimeout(() => rainbowCat.style.display = "none", 10000);
+                setTimeout(() => rainbowCat.style.display = "none", 2000);
             }
         }, 30000);
     </script>
