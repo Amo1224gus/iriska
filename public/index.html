@@ -1,29 +1,112 @@
-<html>
-<title>Clicker Clicker</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Clicker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        #cat {
+            width: 150px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        #cat:active {
+            transform: scale(1.1);
+        }
+        #score {
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cat Clicker</h1>
+    <img id="cat" src="cat.png" alt="Click me!">
+    <div id="score">Clicks: 0</div>
+    <button class="button" id="upgradeBtn">Upgrade Multiplier (Cost: 10)</button>
 
-<body onbeforeunload="return closingCode()">
-  <link rel="stylesheet" href="index.css">
-    <script src="index.js"></script>
-  <div class='topbar'>
-    <a href='http://leemlam.github.io'>Clicker Clicker</a>
-  </div>
-    <center class='center'>
-      <h1 id='total'>LB: 0</h1>
-      <h5 id="click" style="font-family:trebuchet MS;">LB/click: 1 | LB/sec: 0</h5>
-      <img class="round" src="https://decostones.ie/wp-content/uploads/2015/11/click-hand.png" width="150" onclick='clicked()'></img>
-      <br><br>
-      <button id='upgrade' class="round" onclick='upgrade("upgrade")' style="font-family:courier;">0-main upgrade: 15</button>
-      <br><br>
-      <button id='cat' class="round" onclick='upgrade("clicker cat")' style="font-family:courier;">0-clicker cat: 25 | +1/sec</button>
-      <br><br>
-      <button id='worker' class="round" onclick='upgrade("worker")' style="font-family:courier;">0-worker: 250 | +15/sec</button><br><br>
-      <button class="settings" onclick="save()">Save</button>
-      <button class="settings" onclick="load()">Load</button>
-      <button class="settings" onclick="reset()">Reset</button><br><br>
-    </center>
-  </link>
+    <script>
+        let score = parseInt(getCookie("score")) || 0;
+        let multiplier = parseInt(getCookie("multiplier")) || 1;
+        let upgradeCost = 10;
+        let clickTimestamps = [];
+        let banTimer = null;
+
+        const scoreDisplay = document.getElementById("score");
+        const upgradeBtn = document.getElementById("upgradeBtn");
+        const cat = document.getElementById("cat");
+
+        function updateUI() {
+            scoreDisplay.textContent = `Clicks: ${score}`;
+            upgradeBtn.textContent = `Upgrade Multiplier (Cost: ${upgradeCost})`;
+            upgradeBtn.disabled = score < upgradeCost || banTimer !== null;
+        }
+
+        function saveToCookies() {
+            document.cookie = `score=${score}; path=/`;
+            document.cookie = `multiplier=${multiplier}; path=/`;
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        cat.addEventListener("click", () => {
+            if (banTimer) return;
+
+            const now = Date.now();
+            clickTimestamps.push(now);
+
+            // Проверка на автоклик
+            clickTimestamps = clickTimestamps.filter(ts => now - ts < 1000); // Последние 1 секунду
+            if (clickTimestamps.length > 10) {
+                alert("Suspicious clicking detected! You're temporarily banned.");
+                banTimer = setTimeout(() => {
+                    banTimer = null;
+                    updateUI();
+                }, 5000); // Бан на 5 секунд
+                return;
+            }
+
+            score += multiplier;
+            saveToCookies();
+            updateUI();
+        });
+
+        upgradeBtn.addEventListener("click", () => {
+            if (score >= upgradeCost) {
+                score -= upgradeCost;
+                multiplier++;
+                upgradeCost *= 2;
+                saveToCookies();
+                updateUI();
+            }
+        });
+
+        // Инициализация
+        updateUI();
+    </script>
 </body>
-</meta>
-
 </html>
