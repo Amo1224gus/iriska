@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Clicker: Iriska</title>
+    <title>Cat Clicker</title>
     <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
     <style>
         body {
@@ -13,7 +13,6 @@
             background-color: #f4f4f4;
             color: #000;
             transition: background-color 0.5s, color 0.5s;
-            user-select: none;
         }
         body.dark {
             background-color: #222;
@@ -44,10 +43,9 @@
         }
         #menuOverlay {
             position: absolute;
-            top: 0;
-            right: -40%;
-            width: 40%;
-            height: 100%;
+            bottom: -100%;
+            width: 100%;
+            height: 40%;
             background: rgba(0, 0, 0, 0.9);
             color: white;
             display: flex;
@@ -55,13 +53,12 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            border-radius: 10px 0 0 10px;
+            border-radius: 10px 10px 0 0;
             transition: all 0.5s;
             z-index: 5;
-            transform: translateX(100%);
         }
         #menuOverlay.show {
-            transform: translateX(0);
+            bottom: 0;
         }
         .upgrade {
             padding: 15px 25px;
@@ -78,26 +75,10 @@
             cursor: not-allowed;
         }
         #toggleMenu {
-            position: absolute;
-            top: 50%;
-            right: 0;
-            width: 50px;
-            height: 50px;
-            background-color: #444;
-            color: white;
-            border-radius: 5px 0 0 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 10;
-            transform: translateY(-50%);
-        }
-        #themeToggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 50px;
             height: 50px;
             background-color: #444;
@@ -110,50 +91,52 @@
             cursor: pointer;
             z-index: 10;
         }
-        @media screen and (max-width: 768px) {
-            #toggleMenu {
-                bottom: 0;
-                top: unset;
-                transform: translate(0, 0);
-                border-radius: 5px 5px 0 0;
-            }
-            #menuOverlay {
-                width: 100%;
-                height: 40%;
-                bottom: -40%;
-                top: unset;
-                right: 0;
-                transform: translateY(100%);
-            }
-            #menuOverlay.show {
-                transform: translateY(0);
-            }
+        #themeToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #444;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
     <div id="main">
-        <h1>Cat Clicker: Iriska</h1>
+        <h1>Cat Clicker</h1>
         <img id="cat" src="cat.png" alt="Click me!">
         <div id="score">Clicks: 0</div>
         <div id="menuOverlay">
             <button class="upgrade" id="multiplierUpgrade" data-cost="50">Multiplier (50 coins)</button>
             <button class="upgrade" id="autoClickerUpgrade" data-cost="200">Auto Clicker (200 coins)</button>
         </div>
-        <div id="toggleMenu">➤</div>
+        <div id="toggleMenu">⇧</div>
         <div id="themeToggle">🌙</div>
     </div>
     <script>
         let score = parseInt(localStorage.getItem("score")) || 0;
         let multiplier = parseInt(localStorage.getItem("multiplier")) || 1;
         let autoClickerCount = parseInt(localStorage.getItem("autoClickerCount")) || 0;
+        let multiplierCost = parseInt(localStorage.getItem("multiplierCost")) || 50;
+        let autoClickerCost = parseInt(localStorage.getItem("autoClickerCost")) || 200;
         let theme = localStorage.getItem("theme") || "light";
+
         const scoreDisplay = document.getElementById("score");
         const cat = document.getElementById("cat");
         const menuOverlay = document.getElementById("menuOverlay");
         const toggleMenu = document.getElementById("toggleMenu");
         const themeToggle = document.getElementById("themeToggle");
-        const main = document.getElementById("main");
+
+        let clickTimestamps = [];
+        let banTimer = null;
 
         if (theme === "dark") {
             document.body.classList.add("dark");
@@ -164,6 +147,8 @@
             localStorage.setItem("score", score);
             localStorage.setItem("multiplier", multiplier);
             localStorage.setItem("autoClickerCount", autoClickerCount);
+            localStorage.setItem("multiplierCost", multiplierCost);
+            localStorage.setItem("autoClickerCost", autoClickerCost);
             localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
         }
 
@@ -173,23 +158,26 @@
         }
 
         cat.addEventListener("click", () => {
+            if (banTimer) return;
+
+            const now = Date.now();
+            clickTimestamps.push(now);
+            clickTimestamps = clickTimestamps.filter(ts => now - ts < 1000);
+
+            if (clickTimestamps.length > 10) {
+                alert("Suspicious clicking detected! You're temporarily banned.");
+                banTimer = setTimeout(() => {
+                    banTimer = null;
+                }, 5000);
+                return;
+            }
+
             score += multiplier;
             updateScoreDisplay();
         });
 
         toggleMenu.addEventListener("click", () => {
-            const isMobile = window.innerWidth <= 768;
             menuOverlay.classList.toggle("show");
-            if (menuOverlay.classList.contains("show")) {
-                if (isMobile) {
-                    document.body.style.overflow = "hidden";
-                } else {
-                    main.style.transform = "translateX(-40%)";
-                }
-            } else {
-                document.body.style.overflow = "";
-                main.style.transform = "translateX(0)";
-            }
         });
 
         themeToggle.addEventListener("click", () => {
@@ -199,12 +187,11 @@
         });
 
         document.getElementById("multiplierUpgrade").addEventListener("click", function () {
-            const cost = parseInt(this.dataset.cost);
-            if (score >= cost) {
-                score -= cost;
+            if (score >= multiplierCost) {
+                score -= multiplierCost;
                 multiplier += 1;
-                this.dataset.cost = Math.floor(cost * 2); // Увеличение стоимости
-                this.textContent = `Multiplier (${this.dataset.cost} coins)`;
+                multiplierCost = Math.floor(multiplierCost * 1.5);
+                this.textContent = `Multiplier (${multiplierCost} coins)`;
                 updateScoreDisplay();
             } else {
                 alert("Not enough coins!");
@@ -212,14 +199,13 @@
         });
 
         document.getElementById("autoClickerUpgrade").addEventListener("click", function () {
-            const cost = parseInt(this.dataset.cost);
-            if (score >= cost && autoClickerCount < 10) {
-                score -= cost;
+            if (score >= autoClickerCost && autoClickerCount < 10) {
+                score -= autoClickerCost;
                 autoClickerCount++;
-                this.dataset.cost = Math.floor(cost * 2); // Увеличение стоимости
-                this.textContent = `Auto Clicker (${this.dataset.cost} coins)`;
+                autoClickerCost = Math.floor(autoClickerCost * 1.5);
+                this.textContent = `Auto Clicker (${autoClickerCost} coins)`;
                 setInterval(() => {
-                    score += 1; // Автоклик без учета множителя
+                    score += 1; 
                     updateScoreDisplay();
                 }, 1000);
                 updateScoreDisplay();
