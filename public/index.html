@@ -6,6 +6,9 @@
     <title>Cat Clicker</title>
     <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
     <style>
+        * {
+            user-select: none;
+        }
         body {
             font-family: 'Lilita One', cursive;
             margin: 0;
@@ -43,9 +46,9 @@
         }
         #menuOverlay {
             position: absolute;
-            bottom: -100%;
-            width: 100%;
-            height: 40%;
+            right: -300px;
+            width: 300px;
+            height: 100%;
             background: rgba(0, 0, 0, 0.9);
             color: white;
             display: flex;
@@ -53,11 +56,20 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            border-radius: 10px 10px 0 0;
             transition: all 0.5s;
             z-index: 5;
         }
         #menuOverlay.show {
+            right: 0;
+        }
+        #menuOverlay.mobile {
+            bottom: -100%;
+            width: 100%;
+            height: 40%;
+            right: auto;
+            border-radius: 10px 10px 0 0;
+        }
+        #menuOverlay.mobile.show {
             bottom: 0;
         }
         .upgrade {
@@ -107,6 +119,18 @@
             cursor: pointer;
             z-index: 10;
         }
+        #rainbowCat {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 20;
+            display: none;
+        }
+        .rainbow {
+            color: rainbow;
+            text-shadow: 0 0 10px yellow, 0 0 20px orange, 0 0 30px red;
+        }
     </style>
 </head>
 <body>
@@ -120,6 +144,7 @@
         </div>
         <div id="toggleMenu">⇧</div>
         <div id="themeToggle">🌙</div>
+        <img id="rainbowCat" src="rainbow_cat.png" alt="Rainbow Cat">
     </div>
     <script>
         let score = parseInt(localStorage.getItem("score")) || 0;
@@ -134,9 +159,10 @@
         const menuOverlay = document.getElementById("menuOverlay");
         const toggleMenu = document.getElementById("toggleMenu");
         const themeToggle = document.getElementById("themeToggle");
+        const rainbowCat = document.getElementById("rainbowCat");
 
-        let clickTimestamps = [];
-        let banTimer = null;
+        let rainbowActive = false;
+        let rainbowTimeout;
 
         if (theme === "dark") {
             document.body.classList.add("dark");
@@ -154,30 +180,56 @@
 
         function updateScoreDisplay() {
             scoreDisplay.textContent = `Clicks: ${score}`;
+            if (rainbowActive) {
+                scoreDisplay.classList.add("rainbow");
+            } else {
+                scoreDisplay.classList.remove("rainbow");
+            }
             saveState();
         }
 
+        function spawnRainbowCat() {
+            const positions = [
+                { top: 0, left: 0 },
+                { top: 0, right: 0 },
+                { bottom: 0, left: 0 },
+                { bottom: 0, right: 0 },
+            ];
+            const position = positions[Math.floor(Math.random() * positions.length)];
+            Object.assign(rainbowCat.style, position, { display: "block" });
+
+            setTimeout(() => {
+                rainbowCat.style.display = "none";
+            }, 2000);
+        }
+
+        function activateRainbowMode() {
+            rainbowActive = true;
+            multiplier *= 5;
+            updateScoreDisplay();
+
+            clearTimeout(rainbowTimeout);
+            rainbowTimeout = setTimeout(() => {
+                rainbowActive = false;
+                multiplier /= 5;
+                updateScoreDisplay();
+            }, 10000);
+        }
+
         cat.addEventListener("click", () => {
-            if (banTimer) return;
-
-            const now = Date.now();
-            clickTimestamps.push(now);
-            clickTimestamps = clickTimestamps.filter(ts => now - ts < 1000);
-
-            if (clickTimestamps.length > 10) {
-                alert("Suspicious clicking detected! You're temporarily banned.");
-                banTimer = setTimeout(() => {
-                    banTimer = null;
-                }, 5000);
-                return;
-            }
-
             score += multiplier;
             updateScoreDisplay();
         });
 
+        rainbowCat.addEventListener("click", () => {
+            rainbowCat.style.display = "none";
+            activateRainbowMode();
+        });
+
         toggleMenu.addEventListener("click", () => {
+            const isMobile = window.innerHeight > window.innerWidth;
             menuOverlay.classList.toggle("show");
+            menuOverlay.classList.toggle("mobile", isMobile);
         });
 
         themeToggle.addEventListener("click", () => {
@@ -186,34 +238,7 @@
             saveState();
         });
 
-        document.getElementById("multiplierUpgrade").addEventListener("click", function () {
-            if (score >= multiplierCost) {
-                score -= multiplierCost;
-                multiplier += 1;
-                multiplierCost = Math.floor(multiplierCost * 1.5);
-                this.textContent = `Multiplier (${multiplierCost} coins)`;
-                updateScoreDisplay();
-            } else {
-                alert("Not enough coins!");
-            }
-        });
-
-        document.getElementById("autoClickerUpgrade").addEventListener("click", function () {
-            if (score >= autoClickerCost && autoClickerCount < 10) {
-                score -= autoClickerCost;
-                autoClickerCount++;
-                autoClickerCost = Math.floor(autoClickerCost * 1.5);
-                this.textContent = `Auto Clicker (${autoClickerCost} coins)`;
-                setInterval(() => {
-                    score += 1; 
-                    updateScoreDisplay();
-                }, 1000);
-                updateScoreDisplay();
-            } else {
-                alert("Not enough coins or max upgrades reached!");
-            }
-        });
-
+        setInterval(spawnRainbowCat, 30000);
         updateScoreDisplay();
     </script>
 </body>
