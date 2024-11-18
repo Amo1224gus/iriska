@@ -94,6 +94,19 @@
             z-index: 10;
             transform: translateY(-50%);
         }
+        #resetButton {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
         #themeToggle {
             position: absolute;
             top: 20px;
@@ -141,6 +154,7 @@
             <button class="upgrade" id="autoClickerUpgrade" data-cost="200">Auto Clicker (200 coins)</button>
         </div>
         <div id="toggleMenu">➤</div>
+        <button id="resetButton">Reset All</button>
         <div id="themeToggle">🌙</div>
     </div>
     <script>
@@ -148,12 +162,14 @@
         let multiplier = parseInt(localStorage.getItem("multiplier")) || 1;
         let autoClickerCount = parseInt(localStorage.getItem("autoClickerCount")) || 0;
         let theme = localStorage.getItem("theme") || "light";
+        let multiplierCost = parseInt(localStorage.getItem("multiplierCost")) || 50;
+        let autoClickerCost = parseInt(localStorage.getItem("autoClickerCost")) || 200;
         const scoreDisplay = document.getElementById("score");
         const cat = document.getElementById("cat");
         const menuOverlay = document.getElementById("menuOverlay");
         const toggleMenu = document.getElementById("toggleMenu");
         const themeToggle = document.getElementById("themeToggle");
-        const main = document.getElementById("main");
+        const resetButton = document.getElementById("resetButton");
 
         if (theme === "dark") {
             document.body.classList.add("dark");
@@ -164,6 +180,8 @@
             localStorage.setItem("score", score);
             localStorage.setItem("multiplier", multiplier);
             localStorage.setItem("autoClickerCount", autoClickerCount);
+            localStorage.setItem("multiplierCost", multiplierCost);
+            localStorage.setItem("autoClickerCost", autoClickerCost);
             localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
         }
 
@@ -178,18 +196,7 @@
         });
 
         toggleMenu.addEventListener("click", () => {
-            const isMobile = window.innerWidth <= 768;
             menuOverlay.classList.toggle("show");
-            if (menuOverlay.classList.contains("show")) {
-                if (isMobile) {
-                    document.body.style.overflow = "hidden";
-                } else {
-                    main.style.transform = "translateX(-40%)";
-                }
-            } else {
-                document.body.style.overflow = "";
-                main.style.transform = "translateX(0)";
-            }
         });
 
         themeToggle.addEventListener("click", () => {
@@ -198,37 +205,14 @@
             saveState();
         });
 
-        document.getElementById("multiplierUpgrade").addEventListener("click", function () {
-            const cost = parseInt(this.dataset.cost);
-            if (score >= cost) {
-                score -= cost;
-                multiplier += 1;
-                this.dataset.cost = Math.floor(cost * 2); // Увеличение стоимости
-                this.textContent = `Multiplier (${this.dataset.cost} coins)`;
-                updateScoreDisplay();
-            } else {
-                alert("Not enough coins!");
+        let resetCount = 0;
+        resetButton.addEventListener("click", () => {
+            resetCount++;
+            if (resetCount === 3) {
+                localStorage.clear();
+                location.reload();
             }
         });
-
-        document.getElementById("autoClickerUpgrade").addEventListener("click", function () {
-            const cost = parseInt(this.dataset.cost);
-            if (score >= cost && autoClickerCount < 10) {
-                score -= cost;
-                autoClickerCount++;
-                this.dataset.cost = Math.floor(cost * 2); // Увеличение стоимости
-                this.textContent = `Auto Clicker (${this.dataset.cost} coins)`;
-                setInterval(() => {
-                    score += 1; // Автоклик без учета множителя
-                    updateScoreDisplay();
-                }, 1000);
-                updateScoreDisplay();
-            } else {
-                alert("Not enough coins or max upgrades reached!");
-            }
-        });
-
-        updateScoreDisplay();
     </script>
 </body>
 </html>
