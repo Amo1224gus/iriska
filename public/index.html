@@ -137,6 +137,7 @@
             background-image: url('rainbow_cat.png');
             background-size: cover;
             animation: rainbowAnimation 1s linear infinite;
+            cursor: pointer;
         }
         @keyframes rainbowAnimation {
             0% { transform: rotate(0deg); }
@@ -220,13 +221,22 @@
             saveState();
         });
 
+        function updateUpgradeButtons() {
+            document.getElementById("multiplierUpgrade").textContent = `Multiplier (${multiplierCost} coins)`;
+            document.getElementById("autoClickerUpgrade").textContent = `Auto Clicker (${autoClickerCost} coins)`;
+
+            // Enable or disable the buttons based on current score
+            document.getElementById("multiplierUpgrade").classList.toggle("disabled", score < multiplierCost);
+            document.getElementById("autoClickerUpgrade").classList.toggle("disabled", score < autoClickerCost || autoClickerCount >= 10);
+        }
+
         document.getElementById("multiplierUpgrade").addEventListener("click", () => {
             if (score >= multiplierCost) {
                 score -= multiplierCost;
                 multiplier *= 2;
                 multiplierCost *= 2;
                 updateScoreDisplay();
-                document.getElementById("multiplierUpgrade").textContent = `Multiplier (${multiplierCost} coins)`;
+                updateUpgradeButtons();
             }
         });
 
@@ -236,29 +246,25 @@
                 autoClickerCount++;
                 autoClickerCost *= 2;
                 updateScoreDisplay();
-                document.getElementById("autoClickerUpgrade").textContent = `Auto Clicker (${autoClickerCost} coins)`;
+                updateUpgradeButtons();
                 startAutoClicker();
             }
         });
 
         function startAutoClicker() {
-            if (autoClickerInterval) return;
-            autoClickerInterval = setInterval(() => {
-                score += multiplier;
-                updateScoreDisplay();
-            }, 1000);
-        }
-
-        function stopAutoClicker() {
-            clearInterval(autoClickerInterval);
-            autoClickerInterval = null;
+            if (!autoClickerInterval) {
+                autoClickerInterval = setInterval(() => {
+                    score += multiplier;
+                    updateScoreDisplay();
+                }, 1000);
+            }
         }
 
         rainbowCat.addEventListener("click", () => {
             if (!isRainbowActive) {
                 isRainbowActive = true;
-                multiplier *= 5;
                 rainbowCat.style.display = "none";
+                multiplier *= 5;
                 setTimeout(() => {
                     multiplier /= 5;
                     isRainbowActive = false;
@@ -278,6 +284,9 @@
                 setTimeout(() => rainbowCat.style.display = "none", 2000);
             }
         }, 30000);
+
+        updateUpgradeButtons();
+        updateScoreDisplay();
     </script>
 </body>
 </html>
