@@ -7,15 +7,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
     <style>
         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             user-select: none;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
         body {
             font-family: 'Lilita One', cursive;
-            margin: 0;
-            overflow: hidden;
             background-color: #f4f4f4;
             color: #000;
             transition: background-color 0.5s, color 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         body.dark {
             background-color: #222;
@@ -23,13 +33,13 @@
         }
         #main {
             text-align: center;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             position: relative;
-            transition: transform 0.5s ease;
         }
         #cat {
             width: 150px;
@@ -88,9 +98,8 @@
         }
         #toggleMenu {
             position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 50%;
+            right: 10px;
             width: 50px;
             height: 50px;
             background-color: #444;
@@ -102,6 +111,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             z-index: 10;
+            transform: translateY(-50%);
         }
         #themeToggle {
             position: absolute;
@@ -119,18 +129,6 @@
             cursor: pointer;
             z-index: 10;
         }
-        #rainbowCat {
-            position: fixed;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            z-index: 20;
-            display: none;
-        }
-        .rainbow {
-            color: rainbow;
-            text-shadow: 0 0 10px yellow, 0 0 20px orange, 0 0 30px red;
-        }
     </style>
 </head>
 <body>
@@ -144,7 +142,6 @@
         </div>
         <div id="toggleMenu">⇧</div>
         <div id="themeToggle">🌙</div>
-        <img id="rainbowCat" src="rainbow_cat.png" alt="Rainbow Cat">
     </div>
     <script>
         let score = parseInt(localStorage.getItem("score")) || 0;
@@ -159,10 +156,8 @@
         const menuOverlay = document.getElementById("menuOverlay");
         const toggleMenu = document.getElementById("toggleMenu");
         const themeToggle = document.getElementById("themeToggle");
-        const rainbowCat = document.getElementById("rainbowCat");
 
-        let rainbowActive = false;
-        let rainbowTimeout;
+        let lastClickTime = 0;
 
         if (theme === "dark") {
             document.body.classList.add("dark");
@@ -180,50 +175,19 @@
 
         function updateScoreDisplay() {
             scoreDisplay.textContent = `Clicks: ${score}`;
-            if (rainbowActive) {
-                scoreDisplay.classList.add("rainbow");
-            } else {
-                scoreDisplay.classList.remove("rainbow");
-            }
             saveState();
         }
 
-        function spawnRainbowCat() {
-            const positions = [
-                { top: 0, left: 0 },
-                { top: 0, right: 0 },
-                { bottom: 0, left: 0 },
-                { bottom: 0, right: 0 },
-            ];
-            const position = positions[Math.floor(Math.random() * positions.length)];
-            Object.assign(rainbowCat.style, position, { display: "block" });
-
-            setTimeout(() => {
-                rainbowCat.style.display = "none";
-            }, 2000);
-        }
-
-        function activateRainbowMode() {
-            rainbowActive = true;
-            multiplier *= 5;
-            updateScoreDisplay();
-
-            clearTimeout(rainbowTimeout);
-            rainbowTimeout = setTimeout(() => {
-                rainbowActive = false;
-                multiplier /= 5;
-                updateScoreDisplay();
-            }, 10000);
-        }
-
         cat.addEventListener("click", () => {
+            const now = Date.now();
+            if (now - lastClickTime < 50) {
+                alert("Anti Auto-Clicker triggered!");
+                return;
+            }
+            lastClickTime = now;
+
             score += multiplier;
             updateScoreDisplay();
-        });
-
-        rainbowCat.addEventListener("click", () => {
-            rainbowCat.style.display = "none";
-            activateRainbowMode();
         });
 
         toggleMenu.addEventListener("click", () => {
@@ -238,7 +202,6 @@
             saveState();
         });
 
-        setInterval(spawnRainbowCat, 30000);
         updateScoreDisplay();
     </script>
 </body>
