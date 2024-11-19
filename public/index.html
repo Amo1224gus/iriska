@@ -153,6 +153,21 @@
             margin-top: 10px;
             display: none;
         }
+        #keyButton {
+            padding: 15px 25px;
+            margin: 10px;
+            background-color: #ff5722;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: none;
+        }
+        #keyText {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -160,6 +175,8 @@
         <h1>Cat Clicker</h1>
         <img id="cat" src="cat.png" alt="Click me!">
         <div id="score">Clicks: 0</div>
+        <div id="keyText"></div>
+        <button id="keyButton">Get Key</button>
         <div id="menuOverlay">
             <button class="upgrade" id="multiplierUpgrade" data-cost="50">Multiplier (50 coins)</button>
             <button class="upgrade" id="autoClickerUpgrade" data-cost="200">Auto Clicker (200 coins)</button>
@@ -189,6 +206,8 @@
         const themeToggle = document.getElementById("themeToggle");
         const rainbowCat = document.getElementById("rainbowCat");
         const boostIndicator = document.getElementById("boostIndicator");
+        const keyButton = document.getElementById("keyButton");
+        const keyText = document.getElementById("keyText");
 
         if (theme === "dark") {
             document.body.classList.add("dark");
@@ -205,42 +224,22 @@
         }
 
         function updateScoreDisplay() {
-            scoreDisplay.textContent = `Clicks: ${score}`;
+            scoreDisplay.textContent = `Clicks: ${formatScore(score)}`;
             saveState();
         }
 
-        function updateUpgradeButtons() {
-            document.getElementById("multiplierUpgrade").textContent = `Multiplier (${multiplierCost} coins)`;
-            document.getElementById("autoClickerUpgrade").textContent = `Auto Clicker (${autoClickerCost} coins)`;
-
-            const multiplierButton = document.getElementById("multiplierUpgrade");
-            const autoClickerButton = document.getElementById("autoClickerUpgrade");
-
-            // Enable or disable the buttons based on current score
-            multiplierButton.classList.toggle("disabled", score < multiplierCost);
-            autoClickerButton.classList.toggle("disabled", score < autoClickerCost || autoClickerCount >= 10);
-
-            // If score is enough, change the color of the button to active
-            multiplierButton.classList.toggle("active", score >= multiplierCost);
-            autoClickerButton.classList.toggle("active", score >= autoClickerCost && autoClickerCount < 10);
+        function formatScore(score) {
+            if (score >= 1e12) return (score / 1e12).toFixed(2) + 'T';
+            if (score >= 1e9) return (score / 1e9).toFixed(2) + 'B';
+            if (score >= 1e6) return (score / 1e6).toFixed(2) + 'M';
+            if (score >= 1e3) return (score / 1e3).toFixed(2) + 'K';
+            return score;
         }
 
         cat.addEventListener("click", () => {
-            const now = Date.now();
-            if (now - lastClickTime < 50) {
-                alert("Anti Auto-Clicker triggered!");
-                return;
-            }
-            lastClickTime = now;
-
             score += multiplier;
             updateScoreDisplay();
-        });
-
-        toggleMenu.addEventListener("click", () => {
-            const isMobile = window.innerHeight > window.innerWidth;
-            menuOverlay.classList.toggle("show");
-            menuOverlay.classList.toggle("mobile", isMobile);
+            checkKeyButtonVisibility();
         });
 
         themeToggle.addEventListener("click", () => {
@@ -249,49 +248,50 @@
             saveState();
         });
 
-        document.getElementById("multiplierUpgrade").addEventListener("click", () => {
-            if (score >= multiplierCost) {
-                score -= multiplierCost;
-                multiplier *= 2;
-                multiplierCost *= 2;
-                updateUpgradeButtons();
-                updateScoreDisplay();
-            }
+        keyButton.addEventListener("click", () => {
+            const key = generateKey();
+            keyText.textContent = `Your key: ${key}`;
+            navigator.clipboard.writeText(key).then(() => {
+                alert("Key copied to clipboard!");
+            });
+            saveKeyToServer(key);
         });
 
-        document.getElementById("autoClickerUpgrade").addEventListener("click", () => {
-            if (score >= autoClickerCost && autoClickerCount < 10) {
-                score -= autoClickerCost;
-                autoClickerCount++;
-                autoClickerCost = Math.floor(autoClickerCost * 1.5);
-                updateUpgradeButtons();
-                updateScoreDisplay();
-                startAutoClicker();
+        function generateKey() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let key = '';
+            for (let i = 0; i < 10; i++) {
+                key += characters.charAt(Math.floor(Math.random() * characters.length));
             }
-        });
-
-        function startAutoClicker() {
-            if (!autoClickerInterval) {
-                autoClickerInterval = setInterval(() => {
-                    score += multiplier;
-                    updateScoreDisplay();
-                }, 1000);
-            }
+            return key;
         }
 
-        rainbowCat.addEventListener("click", () => {
-            if (!isRainbowActive) {
-                isRainbowActive = true;
-                rainbowCat.style.display = "none";
-                multiplier *= 5;
-                boostIndicator.style.display = "block"; // Show boost indicator
-                setTimeout(() => {
-                    multiplier /= 5;
-                    isRainbowActive = false;
-                    boostIndicator.style.display = "none"; // Hide boost indicator
-                }, 10000);
+        function saveKeyToServer(key) {
+            fetch('https://your-server.com/keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    key: key,
+                    timestamp: Date.now()
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  console.log('Key saved:', data);
+              }).catch(error => {
+                  console.error('Error saving key:', error);
+              });
+        }
+
+        function checkKeyButtonVisibility() {
+            if (score >= 1e12) {
+                keyButton.style.display = "block";
+            } else {
+                keyButton.style.display = "none";
+                keyText.textContent = "To get the key you need 1T clicks.";
             }
-        });
+        }
 
         setInterval(() => {
             if (!isRainbowActive) {
@@ -306,7 +306,7 @@
             }
         }, 30000);
 
-        updateUpgradeButtons();
+        checkKeyButtonVisibility();
         updateScoreDisplay();
     </script>
 </body>
