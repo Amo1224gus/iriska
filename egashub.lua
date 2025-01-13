@@ -1,12 +1,19 @@
 local player = game.Players.LocalPlayer
-local localeId = player.LocaleId 
+local localeId = player.LocaleId -- Получаем текущий язык игрока
 
+print("Текущий LocaleId:", localeId) -- Выводим для отладки
+
+-- Определяем скрипт для выполнения в зависимости от языка
 if localeId == "ru-ru" then
-    print("русский язык выбран")
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Amo1224gus/iriska/refs/heads/main/ru.lua"))();
+    print("Русский язык выбран. Запуск русского скрипта.")
+    -- Вставьте ваш скрипт для русского языка ниже
+elseif localeId == "es-es" then
+    print("Испанский язык выбран. Запуск испанского скрипта.")
+    -- Вставьте ваш скрипт для испанского языка ниже
 elseif localeId == "uk-ua" then
-    print("Украинский язык выбран.")
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Amo1224gus/iriska/refs/heads/main/uk.lua"))();
+    print("Украинский язык выбран. Запуск украинского скрипта.")
+    -- Вставьте ваш скрипт для украинского языка ниже
 else
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Amo1224gus/iriska/refs/heads/main/english.lua"))();
+    print("Другой язык выбран. Запуск стандартного скрипта.")
+    -- Вставьте ваш скрипт для других языков ниже
 end
