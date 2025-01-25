@@ -186,7 +186,7 @@ coroutine.wrap(SMTA_fake_script)()
 local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
 
 local Window = WindUI:CreateWindow({
-    Title = "EgasHub", -- UI Title
+    Title = "EgasHub | Slendy x Pikelz CANON!!!", -- UI Title
     --Icon = "rbxassetid://125272542064435", -- Url or rbxassetid or lucide
     Icon = "rbxassetid://87134700438873", -- Url or rbxassetid or lucide
     Author = "Egas", -- Author & Creator
