@@ -183,7 +183,8 @@ local function SMTA_fake_script() -- IriXa.jasperthesillyy
 end
 coroutine.wrap(SMTA_fake_script)()
 
-local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
 
 local Window = WindUI:CreateWindow({
     Title = "EgasHub | Slendy x Pikelz CANON!!!", -- UI Title
